@@ -1,9 +1,13 @@
 
+
+#ifndef GAME_H
+#define GAME_H
 #include <string>
 #include <vector>
 #include <list>
 #include <SDL2/SDL.h>
 #include "Grid.hpp"
+#include "Renderer.hpp"
 
 namespace GameOfLife
 {
@@ -44,8 +48,9 @@ namespace GameOfLife
         std::list<std::vector<int>> coords;
 
     private:
-        int _ticksPerGeneration = 20;
         Grid _grid;
+        Renderer _renderer;
+        int _ticksPerGeneration = 20;
         int _ticks;
         const char *_title;
         int _xPos;
@@ -55,8 +60,9 @@ namespace GameOfLife
         bool _fullscreen;
         // std::vector<Shape> _shapes;
         SDL_Window *window;
-        SDL_Renderer *renderer;
         void renderBackground();
         void renderGrid();
     };
 }
+
+#endif

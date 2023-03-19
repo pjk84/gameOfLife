@@ -1,5 +1,7 @@
 #define _XOPEN_SOURCE_EXTENDED 1
 #include "Game.hpp"
+#include "Grid.hpp"
+#include "Renderer.hpp"
 #include <SDL2/SDL.h>
 #include <iostream>
 #include <vector>
@@ -9,10 +11,9 @@
 
 using namespace GameOfLife;
 
-SDL_Rect r;
-
 Game::Game(Settings settings)
     : _grid{Grid(settings.gridSize)},
+      _renderer{Renderer(ceil(settings.width))},
       _title{settings.title},
       _xPos(settings.xPos),
       _yPos{settings.yPos},
@@ -29,53 +30,46 @@ Game::~Game()
     std::cout << "destroyed" << std::endl;
 }
 
-void Game::renderGrid()
-{
-    int cellSize = ceil(_width / _grid.gridSize);
-    int lineWidth = ceil(cellSize / 10000);
-    if (lineWidth < 1)
-    {
-        lineWidth = 1;
-    }
-    int margin = (_width - cellSize * _grid.gridSize) / 2;
-    r.h = cellSize - lineWidth;
-    r.w = cellSize - lineWidth;
-    int yPos = margin;
-    // std::cout << "generation:" << std::to_string(_generation) << " number alive:" << std::to_string(_numberLiving) << std::endl;
-    for (int i = 0; i < _grid.gridSize; ++i)
-    {
-        int xPos = margin;
-        if (i > 0)
-        {
-            // shift one cell down
-            yPos += cellSize;
-        }
-        auto &v = _grid._gridArray[_grid.gridArrayIndex].at(i);
-        for (int n = 0; n < _grid.gridSize; ++n)
-        {
-            if (n > 0)
-            {
-                // shift one cell to right
-                xPos += cellSize;
-            }
-            int color = v.at(n) == 1 ? 255 : 0;
-            r.x = xPos;
-            r.y = yPos;
-            SDL_SetRenderDrawColor(renderer, color, color, color, color);
-            SDL_RenderFillRect(renderer, &r);
-            // SDL_SetRenderDrawColor(renderer, 255, 0, 0, 1);
-            // SDL_RenderDrawPoint(renderer, 10, 10);
-        }
-    }
-    return;
-}
-
-void Game::renderBackground()
-{
-    // simple white canvas for now
-    SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
-    SDL_RenderClear(renderer);
-}
+// void Game::renderGrid()
+// {
+//     int cellSize = ceil(_width / _grid.gridSize);
+//     int lineWidth = ceil(cellSize / 10000);
+//     if (lineWidth < 1)
+//     {
+//         lineWidth = 1;
+//     }
+//     int margin = (_width - cellSize * _grid.gridSize) / 2;
+//     r.h = cellSize - lineWidth;
+//     r.w = cellSize - lineWidth;
+//     int yPos = margin;
+//     // std::cout << "generation:" << std::to_string(_generation) << " number alive:" << std::to_string(_numberLiving) << std::endl;
+//     for (int i = 0; i < _grid.gridSize; ++i)
+//     {
+//         int xPos = margin;
+//         if (i > 0)
+//         {
+//             // shift one cell down
+//             yPos += cellSize;
+//         }
+//         auto &v = _grid._gridArray[_grid.gridArrayIndex].at(i);
+//         for (int n = 0; n < _grid.gridSize; ++n)
+//         {
+//             if (n > 0)
+//             {
+//                 // shift one cell to right
+//                 xPos += cellSize;
+//             }
+//             int color = v.at(n) == 1 ? 255 : 0;
+//             r.x = xPos;
+//             r.y = yPos;
+//             SDL_SetRenderDrawColor(renderer, color, color, color, color);
+//             SDL_RenderFillRect(renderer, &r);
+//             // SDL_SetRenderDrawColor(renderer, 255, 0, 0, 1);
+//             // SDL_RenderDrawPoint(renderer, 10, 10);
+//         }
+//     }
+//     return;
+// }
 
 // void Game::renderCell(const Shape& s){
 //     r.x = s.xPos;
@@ -90,10 +84,10 @@ void Game::renderBackground()
 
 void Game::render()
 {
-    renderBackground();
-    renderGrid();
-    SDL_RenderPresent(renderer);
-    SDL_RenderClear(renderer);
+    auto &grid = _grid.gridArray[_grid.gridArrayIndex];
+    _renderer.renderBackground();
+    _renderer.renderGrid(grid);
+    _renderer.renderClear();
 }
 
 void Game::handleEvents()
@@ -169,18 +163,9 @@ void Game::handleEvents()
 //     }
 // }
 
-// void Game::makeShape(){
-//     Shape s(0, 50, 50);
-//     // s.setColor({0, 0, 0, 0});
-//     Circle c(0, 10, 10);
-//     c.setColor({0, 0, 0, 0});
-//     c.setCoords(50, 50);
-//     _shapes.push_back(c);
-// }
-
 void Game::clean()
 {
-    SDL_DestroyRenderer(renderer);
+    _renderer.tearDown();
     SDL_DestroyWindow(window);
     SDL_Quit();
     std::cout << "game quit" << std::endl;
@@ -195,21 +180,6 @@ void Game::handleGeneration()
         _grid.cycleGeneration();
     }
 }
-
-// void Game::checkCollision(Shape& s){
-//     if(s.yPos == 0){
-//         s.yDelta *= -1;
-//     }
-//     if(s.xPos == 0){
-//         s.xDelta *= -1;
-//     }
-//     if(s.yPos + s.height == _height){
-//         s.yDelta *= -1;
-//     }
-//     if(s.xPos + s.width == _width){
-//         s.xDelta *= -1;
-//     }
-// }
 
 void Game::init(Settings settings)
 {
@@ -227,12 +197,7 @@ void Game::init(Settings settings)
         {
             std::cout << "window created" << std::endl;
         }
-        renderer = SDL_CreateRenderer(window, -1, 0);
-        if (renderer)
-        {
-            SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
-            std::cout << "renderer initialized" << std::endl;
-        }
+        _renderer.initialize(window);
         isRunning = true;
     }
 }

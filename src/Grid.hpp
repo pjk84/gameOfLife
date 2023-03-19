@@ -1,4 +1,6 @@
 
+#ifndef GRID_H
+#define GRID_H
 #include <vector>
 
 namespace GameOfLife
@@ -18,7 +20,9 @@ namespace GameOfLife
         void printGrid();
         int gridSize;
         int gridArrayIndex = 0;
-        std::vector<std::vector<int>> _gridArray[2];
+        std::vector<std::vector<int>> gridArray[2];
     };
 
 }
+
+#endif

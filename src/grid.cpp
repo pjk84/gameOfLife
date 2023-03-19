@@ -21,8 +21,8 @@ void Grid::cycleGeneration()
 {
     _numberLiving = 0;
     _generation++;
-    auto &thisGenGrid = _gridArray[gridArrayIndex];
-    auto &nextGenGrid = _gridArray[1 - gridArrayIndex];
+    auto &thisGenGrid = gridArray[gridArrayIndex];
+    auto &nextGenGrid = gridArray[1 - gridArrayIndex];
 
     for (int i = 0; i < gridSize; ++i)
     {
@@ -42,17 +42,17 @@ void Grid::cycleGeneration()
             if (n < gridSize - 1)
             {
                 // 3h neighbour
-                if (thisGenGrid.at(i)[n + 1] == 1)
+                if (thisGenGrid[i][n + 1] == 1)
                 {
                     sum++;
                 }
                 // 1h neighbour
-                if (lookUp && thisGenGrid.at(i - 1)[n + 1] == 1)
+                if (lookUp && thisGenGrid[i - 1][n + 1] == 1)
                 {
                     sum++;
                 }
                 // 5h neighbour
-                if (lookDown && thisGenGrid.at(i + 1)[n + 1] == 1)
+                if (lookDown && thisGenGrid[i + 1][n + 1] == 1)
                 {
                     sum++;
                 }
@@ -60,17 +60,17 @@ void Grid::cycleGeneration()
             if (n > 0)
             {
                 // 9h neighbour
-                if (thisGenGrid.at(i)[n - 1] == 1)
+                if (thisGenGrid[i][n - 1] == 1)
                 {
                     sum++;
                 }
                 // 11h neighbour
-                if (lookUp && thisGenGrid.at(i - 1)[n - 1] == 1)
+                if (lookUp && thisGenGrid[i - 1][n - 1] == 1)
                 {
                     sum++;
                 }
                 // 7h neighbour
-                if (lookDown && thisGenGrid.at(i + 1)[n - 1] == 1)
+                if (lookDown && thisGenGrid[i + 1][n - 1] == 1)
                 {
                     sum++;
                 }
@@ -78,7 +78,7 @@ void Grid::cycleGeneration()
             if (i < gridSize - 1)
             {
                 // 6h neighbour
-                if (lookDown && thisGenGrid.at(i + 1)[n] == 1)
+                if (lookDown && thisGenGrid[i + 1][n] == 1)
                 {
                     sum++;
                 }
@@ -86,23 +86,26 @@ void Grid::cycleGeneration()
             if (i > 0)
             {
                 // 12h neighbour
-                if (lookUp && thisGenGrid.at(i - 1)[n] == 1)
+                if (lookUp && thisGenGrid[i - 1][n] == 1)
                 {
                     sum++;
                 }
             }
-            if (i == 4 && n == 11)
+
+            if (thisGenGrid[i][n] == 1)
             {
-                std::cout << sum << std::endl;
-            }
-            if (thisGenGrid.at(i)[n] == 1)
-            {
+
                 // living cell
                 _numberLiving++;
                 if (sum != 2 && sum != 3)
                 {
                     // kill cell
-                    nextGenGrid.at(i)[n] = 3;
+                    nextGenGrid[i][n] = 0;
+                }
+                else
+                {
+                    // survives
+                    nextGenGrid[i][n] = 1;
                 }
             }
             else
@@ -112,12 +115,16 @@ void Grid::cycleGeneration()
                 if (sum == 3)
                 {
                     // spawn new cell
-                    nextGenGrid.at(i)[n] = 1;
+                    nextGenGrid[i][n] = 1;
+                }
+                else
+                {
+                    // stays empty
+                    nextGenGrid[i][n] = 0;
                 }
             }
         }
     }
-    printGrid();
     gridArrayIndex = 1 - gridArrayIndex;
 }
 
@@ -132,7 +139,7 @@ void Grid::seed(int gridSize)
         for (int n = 0; n < gridSize; n++)
         {
             int r = rand() % 10;
-            if (r == 1)
+            if (r < 3)
             {
                 b = 1;
             }
@@ -146,32 +153,6 @@ void Grid::seed(int gridSize)
         grid.push_back(v);
     }
     auto gridCopy = grid;
-    _gridArray[0] = grid;
-    _gridArray[1] = gridCopy;
-}
-
-void Grid::printGrid()
-{
-    std::cout << "generation:" << std::to_string(_generation) << " number alive:" << std::to_string(_numberLiving) << std::endl;
-    for (int i = 0; i < gridSize; ++i)
-    {
-        auto v = _gridArray[gridArrayIndex].at(i);
-        std::stringstream s;
-        for (auto it = v.begin(); it != v.end(); it++)
-        {
-            if (it != v.begin())
-            {
-                s << " ";
-            }
-            s << *it;
-        }
-        std::cout << s.str() << " " << std::to_string(i) << "\n";
-    }
-    std::string x = "";
-    for (int i = 0; i < gridSize; ++i)
-    {
-        x += std::to_string(i) + " ";
-    }
-    std::cout << x << std::endl;
-    return;
+    gridArray[0] = grid;
+    gridArray[1] = gridCopy;
 }
