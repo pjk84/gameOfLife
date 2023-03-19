@@ -3,43 +3,34 @@
 #include <vector>
 #include <list>
 #include <SDL2/SDL.h>
+#include "Grid.hpp"
 
 namespace GameOfLife
 {
-
-    // class Game
-    // {
-
-    // private:
-    //     int _generation = 0;
-    //     int _numberLiving = 0;
-    //     bool _isPlaying;
-    //     int _gridSize;
-    //     int _gridArrayIndex = 0;
-    //     std::vector<std::vector<int>> _gridArray[2];
-    //     void seed();
-    //     void run();
-    //     void generate();
-
-    // public:
-    //     Game(int gridSize);
-    //     std::string test();
-    //     void seed(int gridSize);
-    //     void printGrid();
-    // };
+    struct Settings
+    {
+        const char *title;
+        int xPos;
+        int yPos;
+        int width;
+        int height;
+        int gridSize;
+        bool fullscreen;
+    };
 
     class Game
     {
     public:
-        bool _isRunning = false;
-        Game(const char *title, int xPos, int yPos, int height, int width, bool fullscreen);
+        bool isRunning = false;
+        Game(Settings settings);
         ~Game();
-        // void init();
+        void printGrid();
+        void init(Settings);
         void handleEvents();
         // void update();
         void render();
         void clean();
-        void renderBackground();
+        void handleGeneration();
         // void renderShape(const Shape &s);
         // void makeShape();
         // void checkCollision(Shape &s);
@@ -53,6 +44,9 @@ namespace GameOfLife
         std::list<std::vector<int>> coords;
 
     private:
+        int _ticksPerGeneration = 20;
+        Grid _grid;
+        int _ticks;
         const char *_title;
         int _xPos;
         int _yPos;
@@ -60,9 +54,9 @@ namespace GameOfLife
         int _width;
         bool _fullscreen;
         // std::vector<Shape> _shapes;
-        int _count = 0;
-        bool _isrunning = false;
         SDL_Window *window;
         SDL_Renderer *renderer;
+        void renderBackground();
+        void renderGrid();
     };
 }

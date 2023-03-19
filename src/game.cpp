@@ -5,40 +5,69 @@
 #include <vector>
 #include <map>
 #include <algorithm>
+#include <math.h>
 
 using namespace GameOfLife;
 
 SDL_Rect r;
 
-Game::Game(const char *title, int xPos, int yPos, int height, int width, bool fullscreen)
-    : _title{title}, _xPos(xPos), _yPos{yPos}, _height{height}, _width{width}, _fullscreen{fullscreen}
+Game::Game(Settings settings)
+    : _grid{Grid(settings.gridSize)},
+      _title{settings.title},
+      _xPos(settings.xPos),
+      _yPos{settings.yPos},
+      _height{settings.height},
+      _width{settings.width},
+      _fullscreen{settings.fullscreen}
 {
-    int flags = 0;
-    if (fullscreen)
-    {
-        flags = SDL_WINDOW_FULLSCREEN;
-    }
-
-    if (SDL_Init(SDL_INIT_EVERYTHING) == 0)
-    {
-        std::cout << "sdl initialized..." << std::endl;
-        window = SDL_CreateWindow(title, xPos, yPos, width, height, flags);
-        if (window)
-        {
-            std::cout << "window created" << std::endl;
-        }
-        renderer = SDL_CreateRenderer(window, -1, 0);
-        if (renderer)
-        {
-            SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
-            std::cout << "renderer initialized" << std::endl;
-        }
-        _isRunning = true;
-    }
+    _ticks = _ticksPerGeneration;
+    init(settings);
 };
 
 Game::~Game()
 {
+    std::cout << "destroyed" << std::endl;
+}
+
+void Game::renderGrid()
+{
+    int cellSize = ceil(_width / _grid.gridSize);
+    int lineWidth = ceil(cellSize / 10000);
+    if (lineWidth < 1)
+    {
+        lineWidth = 1;
+    }
+    int margin = (_width - cellSize * _grid.gridSize) / 2;
+    r.h = cellSize - lineWidth;
+    r.w = cellSize - lineWidth;
+    int yPos = margin;
+    // std::cout << "generation:" << std::to_string(_generation) << " number alive:" << std::to_string(_numberLiving) << std::endl;
+    for (int i = 0; i < _grid.gridSize; ++i)
+    {
+        int xPos = margin;
+        if (i > 0)
+        {
+            // shift one cell down
+            yPos += cellSize;
+        }
+        auto &v = _grid._gridArray[_grid.gridArrayIndex].at(i);
+        for (int n = 0; n < _grid.gridSize; ++n)
+        {
+            if (n > 0)
+            {
+                // shift one cell to right
+                xPos += cellSize;
+            }
+            int color = v.at(n) == 1 ? 255 : 0;
+            r.x = xPos;
+            r.y = yPos;
+            SDL_SetRenderDrawColor(renderer, color, color, color, color);
+            SDL_RenderFillRect(renderer, &r);
+            // SDL_SetRenderDrawColor(renderer, 255, 0, 0, 1);
+            // SDL_RenderDrawPoint(renderer, 10, 10);
+        }
+    }
+    return;
 }
 
 void Game::renderBackground()
@@ -48,7 +77,7 @@ void Game::renderBackground()
     SDL_RenderClear(renderer);
 }
 
-// void Game::renderShape(const Shape& s){
+// void Game::renderCell(const Shape& s){
 //     r.x = s.xPos;
 //     r.y = s.yPos;
 //     r.h = s.height;
@@ -62,8 +91,9 @@ void Game::renderBackground()
 void Game::render()
 {
     renderBackground();
-
+    renderGrid();
     SDL_RenderPresent(renderer);
+    SDL_RenderClear(renderer);
 }
 
 void Game::handleEvents()
@@ -73,7 +103,7 @@ void Game::handleEvents()
     switch (event.type)
     {
     case SDL_QUIT:
-        _isRunning = false;
+        isRunning = false;
         break;
     // case SDL_MOUSEBUTTONDOWN:
     //     handleMouseInput(event.button.button);
@@ -156,6 +186,16 @@ void Game::clean()
     std::cout << "game quit" << std::endl;
 }
 
+void Game::handleGeneration()
+{
+    _ticks--;
+    if (_ticks <= 0)
+    {
+        _ticks = _ticksPerGeneration;
+        _grid.cycleGeneration();
+    }
+}
+
 // void Game::checkCollision(Shape& s){
 //     if(s.yPos == 0){
 //         s.yDelta *= -1;
@@ -170,3 +210,29 @@ void Game::clean()
 //         s.xDelta *= -1;
 //     }
 // }
+
+void Game::init(Settings settings)
+{
+    int flags = 0;
+    if (settings.fullscreen)
+    {
+        flags = SDL_WINDOW_FULLSCREEN;
+    }
+
+    if (SDL_Init(SDL_INIT_EVERYTHING) == 0)
+    {
+        std::cout << "sdl initialized..." << std::endl;
+        window = SDL_CreateWindow(settings.title, settings.xPos, settings.yPos, settings.width, settings.height, flags);
+        if (window)
+        {
+            std::cout << "window created" << std::endl;
+        }
+        renderer = SDL_CreateRenderer(window, -1, 0);
+        if (renderer)
+        {
+            SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+            std::cout << "renderer initialized" << std::endl;
+        }
+        isRunning = true;
+    }
+}
