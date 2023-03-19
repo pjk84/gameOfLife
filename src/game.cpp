@@ -11,18 +11,13 @@
 
 using namespace GameOfLife;
 
-Game::Game(Settings settings)
-    : _grid{Grid(settings.gridSize)},
-      _renderer{Renderer(ceil(settings.width))},
-      _title{settings.title},
-      _xPos(settings.xPos),
-      _yPos{settings.yPos},
-      _height{settings.height},
-      _width{settings.width},
-      _fullscreen{settings.fullscreen}
+Game::Game(Config config)
+    : _config{config},
+      _grid{Grid(config.gridSize)},
+      _renderer{Renderer(ceil(config.width))}
 {
     _ticks = _ticksPerGeneration;
-    init(settings);
+    init(config);
 };
 
 Game::~Game()
@@ -94,17 +89,25 @@ void Game::handleEvents()
 {
     SDL_Event event;
     SDL_PollEvent(&event);
+
     switch (event.type)
     {
     case SDL_QUIT:
         isRunning = false;
         break;
-    // case SDL_MOUSEBUTTONDOWN:
-    //     handleMouseInput(event.button.button);
-    //     break;
-    // case SDL_MOUSEBUTTONUP:
-    //     releaseAllShapes();
-    //     break;
+    case SDL_KEYDOWN:
+        switch (event.key.keysym.sym)
+        {
+        case SDLK_ESCAPE:
+            isPaused = isPaused ? false : true;
+            break;
+        default:
+            break;
+        }
+        break;
+    case SDL_MOUSEBUTTONDOWN:
+        handleMouseInput(event.button.button);
+        break;
     // case SDL_MOUSEMOTION:
     //     handleMouseMotion(event.motion.x, event.motion.y);
     default:
@@ -118,30 +121,18 @@ void Game::handleEvents()
 //     }
 // }
 
-// void Game::handleMouseInput(uint8_t buttonIndex){
-//     int x, y;
-//     SDL_GetMouseState(&x, &y);
-//     switch(buttonIndex){
-//         case SDL_BUTTON_LEFT:
-//             grabShape(x, y);
-//     }
-// }
-
-// void Game::grabShape(int x, int y){
-//     // grab a shape by mouse x and y by shape z (grap top one)
-//     for(auto &shape: _shapes){
-//         if(x > shape.xPos && x <= shape.xPos + shape.width && y >= shape.yPos && y <= shape.yPos + shape.height){
-//             if(!shape.isGrabbed){
-//                 std::cout << "get grabbed" << std::endl;
-//                 activeShapes.push_back(shape.id);
-//                 shape.setGrabbed(true);
-//                 shape.setAnchor(x, y);
-//             }
-//             continue;
-//         }
-//         shape.setGrabbed(false);
-//     }
-// }
+void Game::handleMouseInput(uint8_t buttonIndex)
+{
+    int x, y;
+    SDL_GetMouseState(&x, &y);
+    switch (buttonIndex)
+    {
+    case SDL_BUTTON_LEFT:
+        int cellX = floor(x / _grid.gridSize);
+        int cellY = floor(y / _grid.gridSize);
+        _grid.toggleCell(cellX, cellY);
+    }
+}
 
 // void Game::releaseAllShapes(){
 //     for(auto & shape: _shapes){
@@ -181,10 +172,10 @@ void Game::handleGeneration()
     }
 }
 
-void Game::init(Settings settings)
+void Game::init(Config config)
 {
     int flags = 0;
-    if (settings.fullscreen)
+    if (config.fullscreen)
     {
         flags = SDL_WINDOW_FULLSCREEN;
     }
@@ -192,7 +183,7 @@ void Game::init(Settings settings)
     if (SDL_Init(SDL_INIT_EVERYTHING) == 0)
     {
         std::cout << "sdl initialized..." << std::endl;
-        window = SDL_CreateWindow(settings.title, settings.xPos, settings.yPos, settings.width, settings.height, flags);
+        window = SDL_CreateWindow(config.title, config.xPos, config.yPos, config.width, config.height, flags);
         if (window)
         {
             std::cout << "window created" << std::endl;

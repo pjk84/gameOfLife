@@ -11,7 +11,7 @@
 
 namespace GameOfLife
 {
-    struct Settings
+    struct Config
     {
         const char *title;
         int xPos;
@@ -26,40 +26,29 @@ namespace GameOfLife
     {
     public:
         bool isRunning = false;
-        Game(Settings settings);
+        bool isPaused = false;
+        Game(Config settings);
         ~Game();
         void printGrid();
-        void init(Settings);
+        void init(Config);
         void handleEvents();
-        // void update();
         void render();
         void clean();
         void handleGeneration();
-        // void renderShape(const Shape &s);
-        // void makeShape();
-        // void checkCollision(Shape &s);
-        // void handleMouseInput(uint8_t buttonIndex);
-        // void grabShape(int x, int y);
-        // void releaseAllShapes();
-        // void dragShape();
-        // void handleMouseMotion(Sint32 x, Sint32 y);
+        void handleMouseInput(uint8_t buttonIndex);
         std::string concat(std::vector<std::vector<int>>);
         std::list<int> activeShapes;
         std::list<std::vector<int>> coords;
 
     private:
+        Config _config;
+        SDL_Window *window;
         Grid _grid;
         Renderer _renderer;
-        int _ticksPerGeneration = 20;
+        int _ticksPerGeneration = 25;
         int _ticks;
         const char *_title;
-        int _xPos;
-        int _yPos;
-        int _height;
-        int _width;
-        bool _fullscreen;
-        // std::vector<Shape> _shapes;
-        SDL_Window *window;
+        // std::vector<Shape> _shapes
         void renderBackground();
         void renderGrid();
     };

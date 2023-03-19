@@ -47,7 +47,14 @@ void Renderer::renderGrid(std::vector<std::vector<int>> &grid)
             int color = v[n] == 1 ? 255 : 0;
             r.x = xPos;
             r.y = yPos;
-            SDL_SetRenderDrawColor(_renderer, color, color, color, color);
+            if (v[n] == 1)
+            {
+                SDL_SetRenderDrawColor(_renderer, color, 0, 0, SDL_ALPHA_OPAQUE);
+            }
+            else
+            {
+                SDL_SetRenderDrawColor(_renderer, 255, 255, 255, SDL_ALPHA_OPAQUE);
+            }
             SDL_RenderFillRect(_renderer, &r);
             // SDL_SetRenderDrawColor(renderer, 255, 0, 0, 1);
             // SDL_RenderDrawPoint(renderer, 10, 10);
@@ -59,7 +66,7 @@ void Renderer::renderGrid(std::vector<std::vector<int>> &grid)
 void Renderer::renderBackground()
 {
     // simple white canvas for now
-    SDL_SetRenderDrawColor(_renderer, 255, 255, 255, 255);
+    SDL_SetRenderDrawColor(_renderer, 0, 0, 0, 0);
     SDL_RenderClear(_renderer);
 }
 

@@ -10,9 +10,11 @@ int main(int argc, char *argv[])
     while (game.isRunning)
     {
         game.handleEvents();
-        game.handleGeneration();
+        if (!game.isPaused)
+        {
+            game.handleGeneration();
+        }
         game.render();
-        // std::this_thread::sleep_for(std::chrono::milliseconds(10000000));
     }
     game.clean();
 

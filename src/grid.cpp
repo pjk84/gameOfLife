@@ -128,6 +128,12 @@ void Grid::cycleGeneration()
     gridArrayIndex = 1 - gridArrayIndex;
 }
 
+void Grid::toggleCell(int x, int y)
+{
+    auto &v = gridArray[gridArrayIndex];
+    v[y][x] = v[y][x] == 0 ? 1 : 0;
+}
+
 void Grid::seed(int gridSize)
 {
     // create row with empty cells

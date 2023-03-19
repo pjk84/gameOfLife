@@ -18,6 +18,7 @@ namespace GameOfLife
         Grid(int gridSize);
         void cycleGeneration();
         void printGrid();
+        void toggleCell(int x, int y);
         int gridSize;
         int gridArrayIndex = 0;
         std::vector<std::vector<int>> gridArray[2];
