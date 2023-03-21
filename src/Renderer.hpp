@@ -6,6 +6,7 @@
 
 namespace GameOfLife
 {
+    class Grid;
     class Renderer
     {
     private:
@@ -17,7 +18,8 @@ namespace GameOfLife
         void renderClear();
         void tearDown();
         void initialize(SDL_Window *window);
-        void renderGrid(std::vector<std::vector<int>> &grid);
+        void renderGrid(Grid &grid);
+        void renderCell(int x, int y, int cellSize);
         Renderer(int windowWidth);
     };
 }

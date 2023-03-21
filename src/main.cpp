@@ -6,7 +6,7 @@
 
 int main(int argc, char *argv[])
 {
-    GameOfLife::Game game({"gameOfLife", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 800, 800, 30, false});
+    GameOfLife::Game game({"gameOfLife", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 800, 1000, 10, 10, false});
     while (game.isRunning)
     {
         game.handleEvents();

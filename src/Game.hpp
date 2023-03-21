@@ -18,7 +18,8 @@ namespace GameOfLife
         int yPos;
         int width;
         int height;
-        int gridSize;
+        int rows;
+        int cols;
         bool fullscreen;
     };
 
@@ -51,6 +52,7 @@ namespace GameOfLife
         // std::vector<Shape> _shapes
         void renderBackground();
         void renderGrid();
+        void toggleCell(int x, int y);
     };
 }
 

@@ -1,8 +1,11 @@
 #include "Renderer.hpp"
+#include "Grid.hpp"
 #include <math.h>
 #include <SDL2/SDL.h>
 #include <vector>
 #include <iostream>
+#include <algorithm>
+#include <cstdlib>
 
 using namespace GameOfLife;
 
@@ -13,12 +16,12 @@ Renderer::Renderer(int width)
 {
 }
 
-void Renderer::renderGrid(std::vector<std::vector<int>> &grid)
+void Renderer::renderGrid(Grid &grid)
 {
-    int gridSize = grid[0].size();
-    int cellSize = ceil(_width / gridSize);
-    int margin = (_width - cellSize * gridSize) / 2;
-    int lineWidth = ceil(cellSize / 10000);
+    // the grid to render
+    auto g = grid.gridArray[grid.gridArrayIndex];
+    int cellSize = grid.cellSize;
+    int lineWidth = ceil(grid.rows / 10000);
     if (lineWidth < 1)
     {
         lineWidth = 1;
@@ -26,18 +29,18 @@ void Renderer::renderGrid(std::vector<std::vector<int>> &grid)
 
     r.h = cellSize - lineWidth;
     r.w = cellSize - lineWidth;
-    int yPos = margin;
+    int yPos = grid.marginH;
     // std::cout << "generation:" << std::to_string(_generation) << " number alive:" << std::to_string(_numberLiving) << std::endl;
-    for (int i = 0; i < gridSize; ++i)
+    for (int i = 0; i < grid.rows; ++i)
     {
-        int xPos = margin;
+        int xPos = grid.marginV;
         if (i > 0)
         {
             // shift one cell down
             yPos += cellSize;
         }
-        auto &v = grid[i];
-        for (int n = 0; n < gridSize; ++n)
+        auto &v = g[i];
+        for (int n = 0; n < grid.cols; ++n)
         {
             if (n > 0)
             {
@@ -49,13 +52,13 @@ void Renderer::renderGrid(std::vector<std::vector<int>> &grid)
             r.y = yPos;
             if (v[n] == 1)
             {
-                SDL_SetRenderDrawColor(_renderer, color, 0, 0, SDL_ALPHA_OPAQUE);
+                renderCell(xPos, yPos, cellSize);
             }
             else
             {
-                SDL_SetRenderDrawColor(_renderer, 255, 255, 255, SDL_ALPHA_OPAQUE);
+                SDL_SetRenderDrawColor(_renderer, 255, 255, 100, SDL_ALPHA_OPAQUE);
+                SDL_RenderFillRect(_renderer, &r);
             }
-            SDL_RenderFillRect(_renderer, &r);
             // SDL_SetRenderDrawColor(renderer, 255, 0, 0, 1);
             // SDL_RenderDrawPoint(renderer, 10, 10);
         }
@@ -63,10 +66,32 @@ void Renderer::renderGrid(std::vector<std::vector<int>> &grid)
     return;
 }
 
+void Renderer::renderCell(int x, int y, int cellSize)
+{
+    int c = 255;
+    int center = cellSize / 2;
+    int depth = ceil(cellSize / 4) / 2;
+    for (int i = 0; i < cellSize; i++)
+    {
+        y++;
+        for (int n = 0; n < cellSize; n++)
+        {
+            x++;
+            int d = center - std::max(abs(center - x), abs(center - y));
+
+            int cc = c - (ceil(d / depth) * 25);
+
+            SDL_SetRenderDrawColor(_renderer, cc, 0, 0, SDL_ALPHA_OPAQUE);
+            SDL_RenderDrawPoint(_renderer, x, y);
+        }
+        x -= cellSize;
+    }
+}
+
 void Renderer::renderBackground()
 {
     // simple white canvas for now
-    SDL_SetRenderDrawColor(_renderer, 0, 0, 0, 0);
+    SDL_SetRenderDrawColor(_renderer, 100, 100, 1090, 100);
     SDL_RenderClear(_renderer);
 }
 

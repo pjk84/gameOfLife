@@ -11,15 +11,19 @@ namespace GameOfLife
     private:
         int _generation = 0;
         int _numberLiving = 0;
-        void seed(int gridSize);
+        void seed(int rows, int cols);
         void run();
 
     public:
-        Grid(int gridSize);
+        Grid(int rows, int cols, int width, int height);
         void cycleGeneration();
         void printGrid();
         void toggleCell(int x, int y);
-        int gridSize;
+        int rows;
+        int cols;
+        int cellSize;
+        int marginH;
+        int marginV;
         int gridArrayIndex = 0;
         std::vector<std::vector<int>> gridArray[2];
     };

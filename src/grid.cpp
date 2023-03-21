@@ -8,13 +8,19 @@
 #include <sstream>
 #include <chrono>
 #include <thread>
+#include <math.h>
 
 using namespace GameOfLife;
 
-Grid::Grid(int size)
+Grid::Grid(int rows, int cols, int width, int height)
+    : rows{rows}, cols{cols}
 {
-    gridSize = size;
-    seed(gridSize);
+    cellSize = height < width ? height / rows : width / cols;
+    marginH = (height - (cellSize * rows)) / 2;
+    marginV = (width - (cellSize * cols)) / 2;
+
+    std::cout << marginH << " " << marginV << std::endl;
+    seed(rows, cols);
 }
 
 void Grid::cycleGeneration()
@@ -24,7 +30,7 @@ void Grid::cycleGeneration()
     auto &thisGenGrid = gridArray[gridArrayIndex];
     auto &nextGenGrid = gridArray[1 - gridArrayIndex];
 
-    for (int i = 0; i < gridSize; ++i)
+    for (int i = 0; i < rows; ++i)
     {
         bool lookUp = false;
         if (i > 0)
@@ -32,14 +38,14 @@ void Grid::cycleGeneration()
             lookUp = true;
         }
         bool lookDown = false;
-        if (i < gridSize - 1)
+        if (i < rows - 1)
         {
             lookDown = true;
         }
-        for (int n = 0; n < gridSize; n++)
+        for (int n = 0; n < cols; n++)
         {
             int sum = 0;
-            if (n < gridSize - 1)
+            if (n < cols - 1)
             {
                 // 3h neighbour
                 if (thisGenGrid[i][n + 1] == 1)
@@ -75,7 +81,7 @@ void Grid::cycleGeneration()
                     sum++;
                 }
             }
-            if (i < gridSize - 1)
+            if (i < rows - 1)
             {
                 // 6h neighbour
                 if (lookDown && thisGenGrid[i + 1][n] == 1)
@@ -134,15 +140,15 @@ void Grid::toggleCell(int x, int y)
     v[y][x] = v[y][x] == 0 ? 1 : 0;
 }
 
-void Grid::seed(int gridSize)
+void Grid::seed(int rows, int cols)
 {
     // create row with empty cells
     int b;
     std::vector<std::vector<int>> grid;
-    for (int i = 0; i < gridSize; ++i)
+    for (int i = 0; i < rows; ++i)
     {
         std::vector<int> v;
-        for (int n = 0; n < gridSize; n++)
+        for (int n = 0; n < cols; n++)
         {
             int r = rand() % 10;
             if (r < 3)
