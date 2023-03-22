@@ -10,7 +10,8 @@ namespace GameOfLife
     class Renderer
     {
     private:
-        int _width;
+        const int _width;
+        SDL_Rect r;
         SDL_Renderer *_renderer;
 
     public:
@@ -20,7 +21,8 @@ namespace GameOfLife
         void initialize(SDL_Window *window);
         void renderGrid(Grid &grid);
         void renderCell(int x, int y, int cellSize);
-        Renderer(int windowWidth);
+        void copyCell(int x, int y);
+        Renderer(int width) : _width{width} {}
     };
 }
 

@@ -34,6 +34,7 @@ void Game::render()
 
 void Game::handleEvents()
 {
+
     SDL_Event event;
     SDL_PollEvent(&event);
 
@@ -61,12 +62,6 @@ void Game::handleEvents()
         break;
     }
 }
-
-// void Game::handleMouseMotion(Sint32 x, Sint32 y){
-//     for(auto &id: activeShapes){
-//         _shapes[id].setCoords(x, y, true);
-//     }
-// }
 
 void Game::handleMouseInput(uint8_t buttonIndex)
 {
@@ -105,13 +100,16 @@ void Game::clean()
     std::cout << "game quit" << std::endl;
 }
 
-void Game::handleGeneration()
+void Game::handleTicks()
 {
     _ticks--;
     if (_ticks <= 0)
     {
+        if (!isPaused)
+        {
+            _grid.cycleGeneration();
+        }
         _ticks = _ticksPerGeneration;
-        _grid.cycleGeneration();
     }
 }
 

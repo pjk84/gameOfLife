@@ -19,8 +19,8 @@ namespace GameOfLife
         void cycleGeneration();
         void printGrid();
         void toggleCell(int x, int y);
-        int rows;
-        int cols;
+        const int rows;
+        const int cols;
         int cellSize;
         int marginH;
         int marginV;

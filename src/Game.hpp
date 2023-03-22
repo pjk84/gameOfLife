@@ -35,7 +35,7 @@ namespace GameOfLife
         void handleEvents();
         void render();
         void clean();
-        void handleGeneration();
+        void handleTicks();
         void handleMouseInput(uint8_t buttonIndex);
         std::string concat(std::vector<std::vector<int>>);
         std::list<int> activeShapes;
@@ -49,7 +49,6 @@ namespace GameOfLife
         int _ticksPerGeneration = 25;
         int _ticks;
         const char *_title;
-        // std::vector<Shape> _shapes
         void renderBackground();
         void renderGrid();
         void toggleCell(int x, int y);

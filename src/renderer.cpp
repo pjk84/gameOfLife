@@ -6,26 +6,16 @@
 #include <iostream>
 #include <algorithm>
 #include <cstdlib>
+#include <algorithm>
 
 using namespace GameOfLife;
-
-SDL_Rect r;
-
-Renderer::Renderer(int width)
-    : _width{width}
-{
-}
 
 void Renderer::renderGrid(Grid &grid)
 {
     // the grid to render
     auto g = grid.gridArray[grid.gridArrayIndex];
     int cellSize = grid.cellSize;
-    int lineWidth = ceil(grid.rows / 10000);
-    if (lineWidth < 1)
-    {
-        lineWidth = 1;
-    }
+    int lineWidth = std::max(int(ceil(grid.rows / 10000)), 1);
 
     r.h = cellSize - lineWidth;
     r.w = cellSize - lineWidth;
@@ -39,6 +29,7 @@ void Renderer::renderGrid(Grid &grid)
             // shift one cell down
             yPos += cellSize;
         }
+        r.y = yPos;
         auto &v = g[i];
         for (int n = 0; n < grid.cols; ++n)
         {
@@ -49,18 +40,25 @@ void Renderer::renderGrid(Grid &grid)
             }
             int color = v[n] == 1 ? 255 : 0;
             r.x = xPos;
-            r.y = yPos;
             if (v[n] == 1)
             {
-                renderCell(xPos, yPos, cellSize);
+                if (cellSize < 20)
+                {
+                    // render basic rect
+                    SDL_SetRenderDrawColor(_renderer, 100, 100, 100, SDL_ALPHA_OPAQUE);
+                    SDL_RenderFillRect(_renderer, &r);
+                }
+                else
+                {
+                    // render gradient cell
+                    renderCell(xPos, yPos, cellSize - lineWidth);
+                }
             }
             else
             {
-                SDL_SetRenderDrawColor(_renderer, 255, 255, 100, SDL_ALPHA_OPAQUE);
+                SDL_SetRenderDrawColor(_renderer, 222, 222, 222, SDL_ALPHA_OPAQUE);
                 SDL_RenderFillRect(_renderer, &r);
             }
-            // SDL_SetRenderDrawColor(renderer, 255, 0, 0, 1);
-            // SDL_RenderDrawPoint(renderer, 10, 10);
         }
     }
     return;
@@ -68,30 +66,22 @@ void Renderer::renderGrid(Grid &grid)
 
 void Renderer::renderCell(int x, int y, int cellSize)
 {
-    int c = 255;
-    int center = cellSize / 2;
-    int depth = ceil(cellSize / 4) / 2;
+    SDL_Rect rr = r;
+    int c = 200;
+    rr.h = 1;
     for (int i = 0; i < cellSize; i++)
     {
-        y++;
-        for (int n = 0; n < cellSize; n++)
-        {
-            x++;
-            int d = center - std::max(abs(center - x), abs(center - y));
-
-            int cc = c - (ceil(d / depth) * 25);
-
-            SDL_SetRenderDrawColor(_renderer, cc, 0, 0, SDL_ALPHA_OPAQUE);
-            SDL_RenderDrawPoint(_renderer, x, y);
-        }
-        x -= cellSize;
+        c -= (i > cellSize / 2 ? -1 : 1);
+        SDL_SetRenderDrawColor(_renderer, 0, c, 0, 10);
+        SDL_RenderFillRect(_renderer, &rr);
+        rr.y++;
     }
 }
 
 void Renderer::renderBackground()
 {
     // simple white canvas for now
-    SDL_SetRenderDrawColor(_renderer, 100, 100, 1090, 100);
+    SDL_SetRenderDrawColor(_renderer, 0, 0, 0, 0);
     SDL_RenderClear(_renderer);
 }
 
