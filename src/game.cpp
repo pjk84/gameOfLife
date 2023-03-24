@@ -28,7 +28,16 @@ Game::~Game()
 void Game::render()
 {
     _renderer.renderBackground();
-    _renderer.renderGrid(_grid);
+    // _renderer.renderGridFlat(_grid);
+    if (isoMetric)
+    {
+
+        _renderer.renderGridIsometric(_grid);
+    }
+    else
+    {
+        _renderer.renderGridFlat(_grid);
+    }
     _renderer.renderClear();
 }
 
@@ -46,7 +55,10 @@ void Game::handleEvents()
     case SDL_KEYDOWN:
         switch (event.key.keysym.sym)
         {
-        case SDLK_ESCAPE:
+        case SDLK_SPACE:
+            isoMetric = !isoMetric;
+            break;
+        case SDLK_p:
             isPaused = isPaused ? false : true;
             break;
         default:
@@ -80,12 +92,12 @@ void Game::toggleCell(int x, int y)
 {
     int cellSize = _grid.cellSize;
 
-    if (x > _grid.marginV && x < _grid.marginV + (cellSize * _grid.cols))
+    if (x > _grid.marginX && x < _grid.marginX + (cellSize * _grid.cols))
     {
-        if (y > _grid.marginH && y < _grid.marginH + (cellSize * _grid.rows))
+        if (y > _grid.marginY && y < _grid.marginY + (cellSize * _grid.rows))
         {
-            int cellX = floor((x - _grid.marginV) / cellSize);
-            int cellY = floor((y - _grid.marginH) / cellSize);
+            int cellX = floor((x - _grid.marginX) / cellSize);
+            int cellY = floor((y - _grid.marginY) / cellSize);
             return _grid.toggleCell(cellX, cellY);
         };
     };

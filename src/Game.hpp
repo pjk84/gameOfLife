@@ -28,6 +28,7 @@ namespace GameOfLife
     public:
         bool isRunning = false;
         bool isPaused = false;
+        bool isoMetric = false;
         Game(Config settings);
         ~Game();
         void printGrid();

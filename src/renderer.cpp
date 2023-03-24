@@ -10,7 +10,7 @@
 
 using namespace GameOfLife;
 
-void Renderer::renderGrid(Grid &grid)
+void Renderer::renderGridFlat(Grid &grid)
 {
     // the grid to render
     auto g = grid.gridArray[grid.gridArrayIndex];
@@ -19,11 +19,10 @@ void Renderer::renderGrid(Grid &grid)
 
     r.h = cellSize - lineWidth;
     r.w = cellSize - lineWidth;
-    int yPos = grid.marginH;
-    // std::cout << "generation:" << std::to_string(_generation) << " number alive:" << std::to_string(_numberLiving) << std::endl;
+    int yPos = grid.marginY;
     for (int i = 0; i < grid.rows; ++i)
     {
-        int xPos = grid.marginV;
+        int xPos = grid.marginX;
         if (i > 0)
         {
             // shift one cell down
@@ -56,8 +55,113 @@ void Renderer::renderGrid(Grid &grid)
             }
             else
             {
+
                 SDL_SetRenderDrawColor(_renderer, 222, 222, 222, SDL_ALPHA_OPAQUE);
                 SDL_RenderFillRect(_renderer, &r);
+            }
+        }
+    }
+    return;
+}
+
+void Renderer::renderGridIsometric(Grid &grid)
+{
+    // the grid to render
+    auto g = grid.gridArray[grid.gridArrayIndex];
+    int lineWidth = grid.rows * grid.cols >= 400 ? 0 : 2;
+    float16_t cellSize = grid.cellSize - (lineWidth * 2);
+    float16_t yPos = grid.marginY + lineWidth + ((grid.cellSize * grid.rows) / 2);
+    float16_t xPos = grid.marginX + lineWidth;
+
+    SDL_FPoint textPos = SDL_FPoint{0};
+    SDL_FPoint pTop = SDL_FPoint{xPos + cellSize / 2, yPos - (cellSize / 4)};
+    SDL_FPoint pBotton = SDL_FPoint{xPos + cellSize / 2, yPos + (cellSize / 4)};
+    SDL_FPoint pLeft = SDL_FPoint{xPos, yPos};
+    SDL_FPoint pRight = SDL_FPoint{xPos + cellSize, yPos};
+    SDL_Color colorOff = SDL_Color{222, 222, 222, SDL_ALPHA_OPAQUE};
+    SDL_Color colorOn = SDL_Color{222, 222, 222, SDL_ALPHA_OPAQUE};
+    std::vector<SDL_Vertex> vertsLeft =
+        {
+            {
+                pTop,
+                colorOff,
+                SDL_FPoint{0},
+            },
+            {
+                pBotton,
+                colorOff,
+                SDL_FPoint{0},
+            },
+            {
+                pLeft,
+                colorOff,
+                SDL_FPoint{0},
+            },
+
+        };
+    std::vector<SDL_Vertex> vertsRight =
+        {
+            {
+                pTop,
+                colorOff,
+                SDL_FPoint{0},
+            },
+            {
+                pBotton,
+                colorOff,
+                SDL_FPoint{0},
+            },
+            {
+                pRight,
+                colorOff,
+                SDL_FPoint{0},
+            },
+        };
+    int shiftWidth = ((grid.cellSize * grid.cols) / 2);
+    int shiftHeight = shiftWidth / 2;
+
+    int z = 0;
+    for (int i = 0; i < grid.rows; ++i)
+    {
+        z = 1 - z;
+        if (i > 0)
+        {
+            for (auto &v : vertsLeft)
+            {
+                v.position.x -= shiftWidth - grid.cellSize;
+                v.position.y += shiftHeight;
+            }
+            for (auto &v : vertsRight)
+            {
+                v.position.x -= shiftWidth - grid.cellSize;
+                v.position.y += shiftHeight;
+            }
+        }
+
+        for (int n = 0; n < grid.cols; ++n)
+        {
+            auto &v = g[i];
+            std::cout << cellSize << grid.cellSize << std::endl;
+            SDL_Color c = v[n] == 1 ? SDL_Color{0, 200, 0, SDL_ALPHA_OPAQUE} : n % 2 == z ? SDL_Color{255, 255, 255, SDL_ALPHA_OPAQUE}
+                                                                                          : SDL_Color{222, 222, 222, SDL_ALPHA_OPAQUE};
+            float16_t xShift = n > 0 ? ((cellSize / 2) + lineWidth) : 0;
+            float16_t yShift = n > 0 ? ((cellSize / 4) + lineWidth / 2) : 0;
+            for (auto &v : vertsLeft)
+            {
+                v.color = c;
+                v.position.x += xShift;
+                v.position.y -= yShift;
+            }
+            for (auto &v : vertsRight)
+            {
+                v.color = c;
+                v.position.x += xShift;
+                v.position.y -= yShift;
+            }
+
+            {
+                SDL_RenderGeometry(_renderer, NULL, vertsLeft.data(), vertsLeft.size(), nullptr, 0);
+                SDL_RenderGeometry(_renderer, NULL, vertsRight.data(), vertsRight.size(), nullptr, 0);
             }
         }
     }
@@ -73,6 +177,7 @@ void Renderer::renderCell(int x, int y, int cellSize)
     {
         c -= (i > cellSize / 2 ? -1 : 1);
         SDL_SetRenderDrawColor(_renderer, 0, c, 0, 10);
+
         SDL_RenderFillRect(_renderer, &rr);
         rr.y++;
     }

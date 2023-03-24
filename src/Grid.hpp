@@ -22,8 +22,8 @@ namespace GameOfLife
         const int rows;
         const int cols;
         int cellSize;
-        int marginH;
-        int marginV;
+        int marginY;
+        int marginX;
         int gridArrayIndex = 0;
         std::vector<std::vector<int>> gridArray[2];
     };

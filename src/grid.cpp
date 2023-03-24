@@ -16,10 +16,13 @@ Grid::Grid(int rows, int cols, int width, int height)
     : rows{rows}, cols{cols}
 {
     cellSize = height < width ? height / rows : width / cols;
-    marginH = (height - (cellSize * rows)) / 2;
-    marginV = (width - (cellSize * cols)) / 2;
 
-    std::cout << marginH << " " << marginV << std::endl;
+    // round to nearest multiple of 4.
+    cellSize = round((cellSize / 2) / 2) * 4;
+    marginY = (height - (cellSize * rows)) / 2;
+    marginX = (width - (cellSize * cols)) / 2;
+
+    // std::cout << marginY << " " << cellSize << " " << width << std::endl;
     seed(rows, cols);
 }
 

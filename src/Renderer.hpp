@@ -19,7 +19,8 @@ namespace GameOfLife
         void renderClear();
         void tearDown();
         void initialize(SDL_Window *window);
-        void renderGrid(Grid &grid);
+        void renderGridFlat(Grid &grid);
+        void renderGridIsometric(Grid &grid);
         void renderCell(int x, int y, int cellSize);
         void copyCell(int x, int y);
         Renderer(int width) : _width{width} {}
