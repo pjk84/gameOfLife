@@ -141,7 +141,6 @@ void Renderer::renderGridIsometric(Grid &grid)
         for (int n = 0; n < grid.cols; ++n)
         {
             auto &v = g[i];
-            std::cout << cellSize << grid.cellSize << std::endl;
             SDL_Color c = v[n] == 1 ? SDL_Color{0, 200, 0, SDL_ALPHA_OPAQUE} : n % 2 == z ? SDL_Color{255, 255, 255, SDL_ALPHA_OPAQUE}
                                                                                           : SDL_Color{222, 222, 222, SDL_ALPHA_OPAQUE};
             float16_t xShift = n > 0 ? ((cellSize / 2) + lineWidth) : 0;
@@ -175,7 +174,7 @@ void Renderer::renderCell(int x, int y, int cellSize)
     rr.h = 1;
     for (int i = 0; i < cellSize; i++)
     {
-        c -= (i > cellSize / 2 ? -1 : 1);
+        // c -= (i > cellSize / 2 ? -1 : 1);
         SDL_SetRenderDrawColor(_renderer, 0, c, 0, 10);
 
         SDL_RenderFillRect(_renderer, &rr);

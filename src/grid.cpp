@@ -22,7 +22,6 @@ Grid::Grid(int rows, int cols, int width, int height)
     marginY = (height - (cellSize * rows)) / 2;
     marginX = (width - (cellSize * cols)) / 2;
 
-    // std::cout << marginY << " " << cellSize << " " << width << std::endl;
     seed(rows, cols);
 }
 

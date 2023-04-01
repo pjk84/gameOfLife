@@ -6,7 +6,7 @@
 
 int main(int argc, char *argv[])
 {
-    GameOfLife::Game game({"gameOfLife", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1000, 1000, 100, 100, false});
+    GameOfLife::Game game({"gameOfLife", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1000, 1000, 8, 8, false});
     while (game.isRunning)
     {
         SDL_Delay(40);

@@ -8,8 +8,18 @@
 #include <map>
 #include <algorithm>
 #include <math.h>
+#include <iomanip>
+#include <cmath>
+#include <complex>
 
 using namespace GameOfLife;
+
+typedef std::complex<double> point;
+#define xCoord x()
+#define yCoord y()
+
+// Constant PI for providing angles in radians
+#define PI 3.1415926535897932384626
 
 Game::Game(Config config)
     : _config{config},
@@ -91,17 +101,48 @@ void Game::handleMouseInput(uint8_t buttonIndex)
 void Game::toggleCell(int x, int y)
 {
     int cellSize = _grid.cellSize;
-
-    if (x > _grid.marginX && x < _grid.marginX + (cellSize * _grid.cols))
+    int cellY, cellX;
+    int marginX = _grid.marginX;
+    int marginY = _grid.marginY;
+    if (isoMetric)
     {
-        if (y > _grid.marginY && y < _grid.marginY + (cellSize * _grid.rows))
+        // transform to rectangle to find grid coords
+
+        // get origin coords
+        int xCenter = _config.width / 2;
+        int yCenter = _config.height / 2;
+
+        // get mouse coords relative to origin
+        long a = x - xCenter;
+        long b = (yCenter - y) * 2;
+
+        // calculate new cell width after rotation
+        double newCellWidth = sqrt(pow(cellSize / 2, 2) + pow(cellSize / 2, 2));
+
+        // anti-clockwise rotation of 315deg to get a clock-wise rotation of 45deg
+        point p(a, b);
+        point n = p * std::polar(1.0, 1.75 * PI);
+
+        // set new margin after rotation
+        marginX = (_config.width - (newCellWidth * _grid.rows)) / 2;
+        marginY = marginX;
+
+        cellX = ((n.real() + xCenter) - marginX) / newCellWidth;
+        cellY = ((yCenter - n.imag()) - marginX) / newCellWidth;
+    }
+    else
+    {
+        cellX = floor((x - _grid.marginX) / cellSize);
+        cellY = floor((y - _grid.marginY) / cellSize);
+    }
+    if (cellX >= 0 && cellX < _grid.rows)
+    {
+        if (cellY >= 0 && cellY < _grid.cols)
         {
-            int cellX = floor((x - _grid.marginX) / cellSize);
-            int cellY = floor((y - _grid.marginY) / cellSize);
+            // toggle cell if if window coords are within grid bounds
             return _grid.toggleCell(cellX, cellY);
         };
     };
-    // click was in margin
 }
 
 void Game::clean()
