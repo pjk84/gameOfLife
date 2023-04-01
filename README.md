@@ -1,5 +1,8 @@
 # gameOfLife
 
+This is a cellular automaton, based on Conways algorithm:
+https://en.wikipedia.org/wiki/Conway%27s_Game_of_Life
+
 to compile: make
 to run: ./build/debug/gameOfLife
 
