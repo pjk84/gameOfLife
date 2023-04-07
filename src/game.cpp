@@ -11,6 +11,7 @@
 #include <iomanip>
 #include <cmath>
 #include <complex>
+#include <tuple>
 
 using namespace GameOfLife;
 
@@ -23,7 +24,7 @@ typedef std::complex<double> point;
 
 Game::Game(Config config)
     : _config{config},
-      _grid{Grid(config.rows, config.cols, config.width, config.height)},
+      _grid{Grid(config.gridSize, config.width, config.height)},
       _renderer{Renderer(ceil(config.width))}
 {
     _ticks = _ticksPerGeneration;
@@ -38,11 +39,13 @@ Game::~Game()
 void Game::render()
 {
     _renderer.renderBackground();
-    // _renderer.renderGridFlat(_grid);
+
+    std::tuple<int, int> mouseCoords = getCellCoordinates(mouseX, mouseY);
+
     if (isoMetric)
     {
-
-        _renderer.renderGridIsometric(_grid);
+        // pass mouse coords
+        _renderer.renderGridIsometric(_grid, mouseCoords);
     }
     else
     {
@@ -75,8 +78,11 @@ void Game::handleEvents()
             break;
         }
         break;
+    case SDL_MOUSEMOTION:
+        handleMouseMotionEvent(event.motion);
+        break;
     case SDL_MOUSEBUTTONDOWN:
-        handleMouseInput(event.button.button);
+        handleMouseButtonDown(event.button.button);
         break;
     // case SDL_MOUSEMOTION:
     //     handleMouseMotion(event.motion.x, event.motion.y);
@@ -85,7 +91,13 @@ void Game::handleEvents()
     }
 }
 
-void Game::handleMouseInput(uint8_t buttonIndex)
+void Game::handleMouseMotionEvent(SDL_MouseMotionEvent event)
+{
+    mouseX = event.x;
+    mouseY = event.y;
+}
+
+void Game::handleMouseButtonDown(uint8_t buttonIndex)
 {
     int x, y;
     SDL_GetMouseState(&x, &y);
@@ -99,6 +111,21 @@ void Game::handleMouseInput(uint8_t buttonIndex)
 }
 
 void Game::toggleCell(int x, int y)
+{
+    std::tuple<int, int> coords = getCellCoordinates(x, y);
+    int cellX = std::get<0>(coords);
+    int cellY = std::get<1>(coords);
+    if (cellX >= 0 && cellX < _grid.size)
+    {
+        if (cellY >= 0 && cellY < _grid.size)
+        {
+            // toggle cell if if window coords are within grid bounds
+            return _grid.toggleCell(cellX, cellY);
+        };
+    };
+}
+
+std::tuple<int, int> Game::getCellCoordinates(int x, int y)
 {
     int cellSize = _grid.cellSize;
     int cellY, cellX;
@@ -124,7 +151,7 @@ void Game::toggleCell(int x, int y)
         point n = p * std::polar(1.0, 1.75 * PI);
 
         // set new margin after rotation
-        marginX = (_config.width - (newCellWidth * _grid.rows)) / 2;
+        marginX = (_config.width - (newCellWidth * _grid.size)) / 2;
         marginY = marginX;
 
         cellX = ((n.real() + xCenter) - marginX) / newCellWidth;
@@ -135,14 +162,8 @@ void Game::toggleCell(int x, int y)
         cellX = floor((x - _grid.marginX) / cellSize);
         cellY = floor((y - _grid.marginY) / cellSize);
     }
-    if (cellX >= 0 && cellX < _grid.rows)
-    {
-        if (cellY >= 0 && cellY < _grid.cols)
-        {
-            // toggle cell if if window coords are within grid bounds
-            return _grid.toggleCell(cellX, cellY);
-        };
-    };
+
+    return std::make_tuple(cellX, cellY);
 }
 
 void Game::clean()

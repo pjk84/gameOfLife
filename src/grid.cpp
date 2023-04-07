@@ -12,17 +12,16 @@
 
 using namespace GameOfLife;
 
-Grid::Grid(int rows, int cols, int width, int height)
-    : rows{rows}, cols{cols}
+Grid::Grid(int size, int width, int height)
+    : size(size)
 {
-    cellSize = height < width ? height / rows : width / cols;
-
+    cellSize = height < width ? height / size : width / size;
     // round to nearest multiple of 4.
     cellSize = round((cellSize / 2) / 2) * 4;
-    marginY = (height - (cellSize * rows)) / 2;
-    marginX = (width - (cellSize * cols)) / 2;
+    marginY = (height - (cellSize * size)) / 2;
+    marginX = (width - (cellSize * size)) / 2;
 
-    seed(rows, cols);
+    seed(size);
 }
 
 void Grid::cycleGeneration()
@@ -32,7 +31,7 @@ void Grid::cycleGeneration()
     auto &thisGenGrid = gridArray[gridArrayIndex];
     auto &nextGenGrid = gridArray[1 - gridArrayIndex];
 
-    for (int i = 0; i < rows; ++i)
+    for (int i = 0; i < size; ++i)
     {
         bool lookUp = false;
         if (i > 0)
@@ -40,14 +39,14 @@ void Grid::cycleGeneration()
             lookUp = true;
         }
         bool lookDown = false;
-        if (i < rows - 1)
+        if (i < size - 1)
         {
             lookDown = true;
         }
-        for (int n = 0; n < cols; n++)
+        for (int n = 0; n < size; n++)
         {
             int sum = 0;
-            if (n < cols - 1)
+            if (n < size - 1)
             {
                 // 3h neighbour
                 if (thisGenGrid[i][n + 1] == 1)
@@ -83,7 +82,7 @@ void Grid::cycleGeneration()
                     sum++;
                 }
             }
-            if (i < rows - 1)
+            if (i < size - 1)
             {
                 // 6h neighbour
                 if (lookDown && thisGenGrid[i + 1][n] == 1)
@@ -142,15 +141,15 @@ void Grid::toggleCell(int x, int y)
     v[y][x] = v[y][x] == 0 ? 1 : 0;
 }
 
-void Grid::seed(int rows, int cols)
+void Grid::seed(int size)
 {
     // create row with empty cells
     int b;
     std::vector<std::vector<int>> grid;
-    for (int i = 0; i < rows; ++i)
+    for (int i = 0; i < size; ++i)
     {
         std::vector<int> v;
-        for (int n = 0; n < cols; n++)
+        for (int n = 0; n < size; n++)
         {
             int r = rand() % 10;
             if (r < 3)

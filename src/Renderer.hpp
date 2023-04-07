@@ -16,11 +16,13 @@ namespace GameOfLife
 
     public:
         void renderBackground();
+        void renderCursor();
         void renderClear();
         void tearDown();
         void initialize(SDL_Window *window);
         void renderGridFlat(Grid &grid);
-        void renderGridIsometric(Grid &grid);
+        void renderGridIsometric(Grid &grid, std::tuple<int, int> cursor);
+        SDL_Color getCellColor(bool isAlive, bool hasCursor, int);
         void renderCell(int x, int y, int cellSize);
         void copyCell(int x, int y);
         Renderer(int width) : _width{width} {}

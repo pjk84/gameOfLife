@@ -11,17 +11,16 @@ namespace GameOfLife
     private:
         int _generation = 0;
         int _numberLiving = 0;
-        void seed(int rows, int cols);
+        void seed(int gridSize);
         void run();
 
     public:
-        Grid(int rows, int cols, int width, int height);
+        Grid(int size, int width, int height);
         void cycleGeneration();
         void printGrid();
         void toggleCell(int x, int y);
-        const int rows;
-        const int cols;
         int cellSize;
+        int size;
         int marginY;
         int marginX;
         int gridArrayIndex = 0;

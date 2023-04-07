@@ -7,6 +7,7 @@
 #include <algorithm>
 #include <cstdlib>
 #include <algorithm>
+#include <tuple>
 
 using namespace GameOfLife;
 
@@ -15,12 +16,12 @@ void Renderer::renderGridFlat(Grid &grid)
     // the grid to render
     auto g = grid.gridArray[grid.gridArrayIndex];
     int cellSize = grid.cellSize;
-    int lineWidth = std::max(int(ceil(grid.rows / 10000)), 1);
+    int lineWidth = std::max(int(ceil(grid.size / 10000)), 1);
 
     r.h = cellSize - lineWidth;
     r.w = cellSize - lineWidth;
     int yPos = grid.marginY;
-    for (int i = 0; i < grid.rows; ++i)
+    for (int i = 0; i < grid.size; ++i)
     {
         int xPos = grid.marginX;
         if (i > 0)
@@ -30,7 +31,7 @@ void Renderer::renderGridFlat(Grid &grid)
         }
         r.y = yPos;
         auto &v = g[i];
-        for (int n = 0; n < grid.cols; ++n)
+        for (int n = 0; n < grid.size; ++n)
         {
             if (n > 0)
             {
@@ -64,13 +65,13 @@ void Renderer::renderGridFlat(Grid &grid)
     return;
 }
 
-void Renderer::renderGridIsometric(Grid &grid)
+void Renderer::renderGridIsometric(Grid &grid, std::tuple<int, int> cursor)
 {
     // the grid to render
     auto g = grid.gridArray[grid.gridArrayIndex];
-    int lineWidth = grid.rows * grid.cols >= 400 ? 0 : 2;
+    int lineWidth = grid.size * grid.size >= 400 ? 0 : 2;
     float16_t cellSize = grid.cellSize - (lineWidth * 2);
-    float16_t yPos = grid.marginY + lineWidth + ((grid.cellSize * grid.rows) / 2);
+    float16_t yPos = grid.marginY + lineWidth + ((grid.cellSize * grid.size) / 2);
     float16_t xPos = grid.marginX + lineWidth;
 
     SDL_FPoint textPos = SDL_FPoint{0};
@@ -117,13 +118,13 @@ void Renderer::renderGridIsometric(Grid &grid)
                 SDL_FPoint{0},
             },
         };
-    int shiftWidth = ((grid.cellSize * grid.cols) / 2);
+    int shiftWidth = ((grid.cellSize * grid.size) / 2);
     int shiftHeight = shiftWidth / 2;
 
     int z = 0;
-    for (int i = 0; i < grid.rows; ++i)
+    for (int i = 0; i < grid.size; ++i)
     {
-        z = 1 - z;
+
         if (i > 0)
         {
             for (auto &v : vertsLeft)
@@ -138,11 +139,22 @@ void Renderer::renderGridIsometric(Grid &grid)
             }
         }
 
-        for (int n = 0; n < grid.cols; ++n)
+        for (int n = 0; n < grid.size; ++n)
         {
+
+            bool showCursor = std::get<0>(cursor) == n && std::get<1>(cursor) == i;
             auto &v = g[i];
-            SDL_Color c = v[n] == 1 ? SDL_Color{0, 200, 0, SDL_ALPHA_OPAQUE} : n % 2 == z ? SDL_Color{255, 255, 255, SDL_ALPHA_OPAQUE}
-                                                                                          : SDL_Color{222, 222, 222, SDL_ALPHA_OPAQUE};
+            int value = v[n];
+            // SDL_Color c = value == 1 ? SDL_Color{0, 200, 0, SDL_ALPHA_OPAQUE} : n % 2 == z ? SDL_Color{255, 255, 255, SDL_ALPHA_OPAQUE}
+            //                                                                                : SDL_Color{222, 222, 222, SDL_ALPHA_OPAQUE};
+
+            // if (showCursor)
+            // {
+            //     c = SDL_Color{0, 100, 50, SDL_ALPHA_OPAQUE};
+            // }
+
+            auto c = getCellColor(value == 1, showCursor, z);
+
             float16_t xShift = n > 0 ? ((cellSize / 2) + lineWidth) : 0;
             float16_t yShift = n > 0 ? ((cellSize / 4) + lineWidth / 2) : 0;
             for (auto &v : vertsLeft)
@@ -162,9 +174,22 @@ void Renderer::renderGridIsometric(Grid &grid)
                 SDL_RenderGeometry(_renderer, NULL, vertsLeft.data(), vertsLeft.size(), nullptr, 0);
                 SDL_RenderGeometry(_renderer, NULL, vertsRight.data(), vertsRight.size(), nullptr, 0);
             }
+            z++;
         }
     }
     return;
+}
+
+SDL_Color Renderer::getCellColor(bool isAlive, bool hasCursor, int index)
+{
+    SDL_Color c = isAlive ? SDL_Color{0, 100, 50, SDL_ALPHA_OPAQUE} : index % 2 == 0 ? SDL_Color{255, 255, 255, SDL_ALPHA_OPAQUE}
+                                                                                     : SDL_Color{222, 222, 222, SDL_ALPHA_OPAQUE};
+
+    if (hasCursor)
+    {
+        c = SDL_Color{0, 200, 0, SDL_ALPHA_OPAQUE};
+    }
+    return c;
 }
 
 void Renderer::renderCell(int x, int y, int cellSize)
@@ -187,6 +212,10 @@ void Renderer::renderBackground()
     // simple white canvas for now
     SDL_SetRenderDrawColor(_renderer, 0, 0, 0, 0);
     SDL_RenderClear(_renderer);
+}
+
+void Renderer::renderCursor()
+{
 }
 
 void Renderer::renderClear()

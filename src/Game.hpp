@@ -8,6 +8,7 @@
 #include <SDL2/SDL.h>
 #include "Grid.hpp"
 #include "Renderer.hpp"
+#include <tuple>
 
 namespace GameOfLife
 {
@@ -16,10 +17,9 @@ namespace GameOfLife
         const char *title;
         int xPos;
         int yPos;
-        int width;
         int height;
-        int rows;
-        int cols;
+        int width;
+        int gridSize;
         bool fullscreen;
     };
 
@@ -27,8 +27,10 @@ namespace GameOfLife
     {
     public:
         bool isRunning = false;
-        bool isPaused = true;
-        bool isoMetric = true;
+        bool isPaused = false;
+        bool isoMetric = false;
+        int mouseX;
+        int mouseY;
         Game(Config settings);
         ~Game();
         void printGrid();
@@ -37,7 +39,9 @@ namespace GameOfLife
         void render();
         void clean();
         void handleTicks();
-        void handleMouseInput(uint8_t buttonIndex);
+        std::tuple<int, int> getCellCoordinates(int x, int y);
+        void handleMouseButtonDown(uint8_t buttonIndex);
+        void handleMouseMotionEvent(SDL_MouseMotionEvent event);
         std::string concat(std::vector<std::vector<int>>);
         std::list<int> activeShapes;
         std::list<std::vector<int>> coords;
