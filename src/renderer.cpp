@@ -124,7 +124,7 @@ void Renderer::renderGridIsometric(Grid &grid, std::tuple<int, int> cursor)
     int z = 0;
     for (int i = 0; i < grid.size; ++i)
     {
-
+        z++;
         if (i > 0)
         {
             for (auto &v : vertsLeft)

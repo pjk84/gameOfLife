@@ -128,7 +128,7 @@ void Game::toggleCell(int x, int y)
 std::tuple<int, int> Game::getCellCoordinates(int x, int y)
 {
     int cellSize = _grid.cellSize;
-    int cellY, cellX;
+    double cellY, cellX;
     int marginX = _grid.marginX;
     int marginY = _grid.marginY;
     if (isoMetric)
@@ -143,27 +143,27 @@ std::tuple<int, int> Game::getCellCoordinates(int x, int y)
         long a = x - xCenter;
         long b = (yCenter - y) * 2;
 
-        // calculate new cell width after rotation
-        double newCellWidth = sqrt(pow(cellSize / 2, 2) + pow(cellSize / 2, 2));
+        // calculate new cell width after rotation (hypotenuse of triangle after 45 deg rotation)
+        double l = pow(cellSize / 2, 2); // leg length
+        double newCellWidth = sqrt(l * 2);
 
         // anti-clockwise rotation of 315deg to get a clock-wise rotation of 45deg
         point p(a, b);
         point n = p * std::polar(1.0, 1.75 * PI);
 
         // set new margin after rotation
-        marginX = (_config.width - (newCellWidth * _grid.size)) / 2;
-        marginY = marginX;
+        double margin = (_config.width - (newCellWidth * _grid.size)) / 2;
 
-        cellX = ((n.real() + xCenter) - marginX) / newCellWidth;
-        cellY = ((yCenter - n.imag()) - marginX) / newCellWidth;
+        cellX = ((n.real() + xCenter) - margin) / newCellWidth;
+        cellY = ((yCenter - n.imag()) - margin) / newCellWidth;
     }
     else
     {
-        cellX = floor((x - _grid.marginX) / cellSize);
-        cellY = floor((y - _grid.marginY) / cellSize);
+        cellX = (x - _grid.marginX) / cellSize;
+        cellY = (y - _grid.marginY) / cellSize;
     }
 
-    return std::make_tuple(cellX, cellY);
+    return std::make_tuple(floor(cellX), floor(cellY));
 }
 
 void Game::clean()
