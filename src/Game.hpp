@@ -36,9 +36,10 @@ namespace GameOfLife
         void printGrid();
         void init(Config);
         void handleEvents();
-        void render();
+        void render(int ticks);
         void clean();
         void handleTicks();
+        int getCurrentTickAsPercentage();
         std::tuple<int, int> getCellCoordinates(int x, int y);
         void handleMouseButtonDown(uint8_t buttonIndex);
         void handleMouseMotionEvent(SDL_MouseMotionEvent event);

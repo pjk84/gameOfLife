@@ -65,7 +65,7 @@ void Renderer::renderGridFlat(Grid &grid)
     return;
 }
 
-void Renderer::renderGridIsometric(Grid &grid, std::tuple<int, int> cursor)
+void Renderer::renderGridIsometric(Grid &grid, std::tuple<int, int> cursor, int ticks)
 {
     // the grid to render
     auto g = grid.gridArray[grid.gridArrayIndex];
@@ -143,6 +143,10 @@ void Renderer::renderGridIsometric(Grid &grid, std::tuple<int, int> cursor)
         {
 
             bool showCursor = std::get<0>(cursor) == n && std::get<1>(cursor) == i;
+            if (showCursor)
+            {
+                renderCursor();
+            }
             auto &v = g[i];
             int value = v[n];
             // SDL_Color c = value == 1 ? SDL_Color{0, 200, 0, SDL_ALPHA_OPAQUE} : n % 2 == z ? SDL_Color{255, 255, 255, SDL_ALPHA_OPAQUE}
@@ -153,7 +157,7 @@ void Renderer::renderGridIsometric(Grid &grid, std::tuple<int, int> cursor)
             //     c = SDL_Color{0, 100, 50, SDL_ALPHA_OPAQUE};
             // }
 
-            auto c = getCellColor(value == 1, showCursor, z);
+            auto c = getCellColor(value == 1, showCursor, z, ticks);
 
             float16_t xShift = n > 0 ? ((cellSize / 2) + lineWidth) : 0;
             float16_t yShift = n > 0 ? ((cellSize / 4) + lineWidth / 2) : 0;
@@ -180,14 +184,20 @@ void Renderer::renderGridIsometric(Grid &grid, std::tuple<int, int> cursor)
     return;
 }
 
-SDL_Color Renderer::getCellColor(bool isAlive, bool hasCursor, int index)
+SDL_Color Renderer::getCellColor(bool isAlive, bool hasCursor, int index, int ticks)
 {
     SDL_Color c = isAlive ? SDL_Color{0, 100, 50, SDL_ALPHA_OPAQUE} : index % 2 == 0 ? SDL_Color{255, 255, 255, SDL_ALPHA_OPAQUE}
                                                                                      : SDL_Color{222, 222, 222, SDL_ALPHA_OPAQUE};
 
     if (hasCursor)
     {
-        c = SDL_Color{0, 200, 0, SDL_ALPHA_OPAQUE};
+        // breathe color effect
+
+        // todo: isolate
+        auto fade = ticks > 50 ? 100 - ticks : ticks;
+        std::cout << fade << " - " << ticks << std::endl;
+        Uint8 t = 200 - fade * 2;
+        c = SDL_Color{0, t, 0, SDL_ALPHA_OPAQUE};
     }
     return c;
 }

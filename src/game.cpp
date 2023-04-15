@@ -36,7 +36,7 @@ Game::~Game()
     std::cout << "destroyed" << std::endl;
 }
 
-void Game::render()
+void Game::render(int ticks)
 {
     _renderer.renderBackground();
 
@@ -45,7 +45,7 @@ void Game::render()
     if (isoMetric)
     {
         // pass mouse coords
-        _renderer.renderGridIsometric(_grid, mouseCoords);
+        _renderer.renderGridIsometric(_grid, mouseCoords, ticks);
     }
     else
     {
@@ -185,6 +185,12 @@ void Game::handleTicks()
         }
         _ticks = _ticksPerGeneration;
     }
+}
+
+// return current tick as percentage of total ticks
+int Game::getCurrentTickAsPercentage()
+{
+    return (static_cast<float>(_ticks) / static_cast<float>(_ticksPerGeneration)) * 100;
 }
 
 void Game::init(Config config)

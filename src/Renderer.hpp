@@ -21,8 +21,8 @@ namespace GameOfLife
         void tearDown();
         void initialize(SDL_Window *window);
         void renderGridFlat(Grid &grid);
-        void renderGridIsometric(Grid &grid, std::tuple<int, int> cursor);
-        SDL_Color getCellColor(bool isAlive, bool hasCursor, int);
+        void renderGridIsometric(Grid &grid, std::tuple<int, int> cursor, int ticks);
+        SDL_Color getCellColor(bool isAlive, bool hasCursor, int index, int ticks);
         void renderCell(int x, int y, int cellSize);
         void copyCell(int x, int y);
         Renderer(int width) : _width{width} {}

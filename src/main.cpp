@@ -17,7 +17,7 @@ int main(int argc, char *argv[])
     {
         SDL_Delay(40);
         game.handleEvents();
-        game.render();
+        game.render(game.getCurrentTickAsPercentage());
         game.handleTicks();
     }
     game.clean();
