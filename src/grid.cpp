@@ -26,8 +26,8 @@ Grid::Grid(int size, int width, int height)
 
 void Grid::cycleGeneration()
 {
-    _numberLiving = 0;
-    _generation++;
+    population = 0;
+    generation++;
     auto &thisGenGrid = gridArray[gridArrayIndex];
     auto &nextGenGrid = gridArray[1 - gridArrayIndex];
 
@@ -103,7 +103,6 @@ void Grid::cycleGeneration()
             {
 
                 // living cell
-                _numberLiving++;
                 if (sum != 2 && sum != 3)
                 {
                     // kill cell
@@ -111,6 +110,7 @@ void Grid::cycleGeneration()
                 }
                 else
                 {
+                    population++;
                     // survives
                     nextGenGrid[i][n] = 1;
                 }
@@ -121,6 +121,7 @@ void Grid::cycleGeneration()
                 // empty cell
                 if (sum == 3)
                 {
+                    population++;
                     // spawn new cell
                     nextGenGrid[i][n] = 1;
                 }
@@ -137,8 +138,17 @@ void Grid::cycleGeneration()
 
 void Grid::toggleCell(int x, int y)
 {
-    auto &v = gridArray[gridArrayIndex];
-    v[y][x] = v[y][x] == 0 ? 1 : 0;
+    auto &grid = gridArray[gridArrayIndex];
+    auto v = grid[y][x];
+    grid[y][x] = 1 - v;
+    if (v == 1)
+    {
+        population--;
+    }
+    else
+    {
+        population++;
+    }
 }
 
 void Grid::seed(int size)
@@ -155,6 +165,7 @@ void Grid::seed(int size)
             if (r < 3)
             {
                 b = 1;
+                population += 1;
             }
             else
             {

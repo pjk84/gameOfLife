@@ -2,10 +2,19 @@
 #ifndef RENDERER_H
 #define RENDERER_H
 #include <SDL2/SDL.h>
-#include <vector>
+#include <SDL2_ttf/SDL_ttf.h>
+#include <tuple>
 
 namespace GameOfLife
 {
+    struct textProps
+    {
+        int x;
+        int y;
+        const char *body;
+        SDL_Color color;
+        TTF_Font *font;
+    };
     class Grid;
     class Renderer
     {
@@ -15,6 +24,7 @@ namespace GameOfLife
         SDL_Renderer *_renderer;
 
     public:
+        void renderText(textProps text);
         void renderBackground();
         void renderCursor();
         void renderClear();

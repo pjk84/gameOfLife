@@ -6,6 +6,7 @@
 #include <vector>
 #include <list>
 #include <SDL2/SDL.h>
+// #include <SDL2_ttf/SDL_ttf.h>
 #include "Grid.hpp"
 #include "Renderer.hpp"
 #include <tuple>
@@ -29,6 +30,7 @@ namespace GameOfLife
         bool isRunning = false;
         bool isPaused = false;
         bool isoMetric = false;
+        TTF_Font *font;
         int mouseX;
         int mouseY;
         Game(Config settings);
@@ -57,6 +59,7 @@ namespace GameOfLife
         const char *_title;
         void renderBackground();
         void renderGrid();
+        void initFont();
         void toggleCell(int x, int y);
     };
 }

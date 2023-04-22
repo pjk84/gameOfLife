@@ -3,6 +3,7 @@
 #include "Grid.hpp"
 #include "Renderer.hpp"
 #include <SDL2/SDL.h>
+#include <SDL2_ttf/SDL_ttf.h>
 #include <iostream>
 #include <vector>
 #include <map>
@@ -10,8 +11,10 @@
 #include <math.h>
 #include <iomanip>
 #include <cmath>
+#include <string>
 #include <complex>
 #include <tuple>
+#include <filesystem>
 
 using namespace GameOfLife;
 
@@ -40,12 +43,16 @@ void Game::render(int ticks)
 {
     _renderer.renderBackground();
 
-    std::tuple<int, int> mouseCoords = getCellCoordinates(mouseX, mouseY);
-
     if (isoMetric)
     {
         // pass mouse coords
+        auto mouseCoords = getCellCoordinates(mouseX, mouseY);
         _renderer.renderGridIsometric(_grid, mouseCoords, ticks);
+
+        // render text
+        std::string stats = "generation: " + std::to_string(_grid.generation);
+        stats += " - population: " + std::to_string(_grid.population);
+        _renderer.renderText({25, 10, stats.c_str(), {255, 255, 255}, font});
     }
     else
     {
@@ -171,7 +178,9 @@ void Game::clean()
     _renderer.tearDown();
     SDL_DestroyWindow(window);
     SDL_Quit();
-    std::cout << "game quit" << std::endl;
+    TTF_Quit();
+    std::cout
+        << "game quit" << std::endl;
 }
 
 void Game::handleTicks()
@@ -179,7 +188,7 @@ void Game::handleTicks()
     _ticks--;
     if (_ticks <= 0)
     {
-        if (!isPaused)
+        if (!isPaused && _grid.population > 0)
         {
             _grid.cycleGeneration();
         }
@@ -201,6 +210,8 @@ void Game::init(Config config)
         flags = SDL_WINDOW_FULLSCREEN;
     }
 
+    initFont();
+
     if (SDL_Init(SDL_INIT_EVERYTHING) == 0)
     {
         std::cout << "sdl initialized..." << std::endl;
@@ -212,4 +223,20 @@ void Game::init(Config config)
         _renderer.initialize(window);
         isRunning = true;
     }
+}
+
+void Game::initFont()
+{
+    if (TTF_Init() < 0)
+    {
+        printf("Couldn't initialize SDL TTF: %s\n", SDL_GetError());
+        exit(1);
+    }
+
+    auto f = TTF_OpenFont("Geneva.ttf", 24);
+    if (!font)
+    {
+        printf("Couldn't initialize font: %s\n", SDL_GetError());
+    }
+    font = f;
 }

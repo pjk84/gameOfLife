@@ -9,13 +9,13 @@ namespace GameOfLife
     {
 
     private:
-        int _generation = 0;
-        int _numberLiving = 0;
         void seed(int gridSize);
         void run();
 
     public:
         Grid(int size, int width, int height);
+        int generation = 0;
+        int population = 0;
         void cycleGeneration();
         void printGrid();
         void toggleCell(int x, int y);

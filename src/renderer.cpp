@@ -2,6 +2,7 @@
 #include "Grid.hpp"
 #include <math.h>
 #include <SDL2/SDL.h>
+#include <SDL2_ttf/SDL_ttf.h>
 #include <vector>
 #include <iostream>
 #include <algorithm>
@@ -195,7 +196,6 @@ SDL_Color Renderer::getCellColor(bool isAlive, bool hasCursor, int index, int ti
 
         // todo: isolate
         auto fade = ticks > 50 ? 100 - ticks : ticks;
-        std::cout << fade << " - " << ticks << std::endl;
         Uint8 t = 200 - fade * 2;
         c = SDL_Color{0, t, 0, SDL_ALPHA_OPAQUE};
     }
@@ -215,6 +215,17 @@ void Renderer::renderCell(int x, int y, int cellSize)
         SDL_RenderFillRect(_renderer, &rr);
         rr.y++;
     }
+}
+
+void Renderer::renderText(textProps text)
+{
+    auto txt = TTF_RenderText_Solid(text.font, text.body, text.color);
+
+    SDL_Texture *text_texture = SDL_CreateTextureFromSurface(_renderer, txt);
+
+    SDL_Rect dest = {25, 10, txt->w, txt->h};
+
+    SDL_RenderCopy(_renderer, text_texture, NULL, &dest);
 }
 
 void Renderer::renderBackground()
