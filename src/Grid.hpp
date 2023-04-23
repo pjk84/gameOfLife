@@ -9,10 +9,11 @@ namespace GameOfLife
     {
 
     private:
-        void seed(int gridSize);
+        void seed();
         void run();
 
     public:
+        void reset();
         Grid(int size, int width, int height);
         int generation = 0;
         int population = 0;

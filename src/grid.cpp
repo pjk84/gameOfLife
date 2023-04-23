@@ -21,7 +21,7 @@ Grid::Grid(int size, int width, int height)
     marginY = (height - (cellSize * size)) / 2;
     marginX = (width - (cellSize * size)) / 2;
 
-    seed(size);
+    seed();
 }
 
 void Grid::cycleGeneration()
@@ -136,6 +136,12 @@ void Grid::cycleGeneration()
     gridArrayIndex = 1 - gridArrayIndex;
 }
 
+void Grid::reset()
+{
+    population = 0;
+    generation = 0;
+    seed();
+}
 void Grid::toggleCell(int x, int y)
 {
     auto &grid = gridArray[gridArrayIndex];
@@ -151,7 +157,7 @@ void Grid::toggleCell(int x, int y)
     }
 }
 
-void Grid::seed(int size)
+void Grid::seed()
 {
     // create row with empty cells
     int b;

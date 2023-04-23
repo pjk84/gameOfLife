@@ -90,6 +90,9 @@ void Game::handleEvents()
         case SDLK_p:
             isPaused = isPaused ? false : true;
             break;
+        case SDLK_r:
+            _grid.reset();
+            break;
         default:
             break;
         }

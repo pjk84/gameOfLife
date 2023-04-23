@@ -73,53 +73,13 @@ void Renderer::renderGridIsometric(Grid &grid, std::array<int, 2> cursor, int ti
     auto g = grid.gridArray[grid.gridArrayIndex];
     int lineWidth = grid.size * grid.size >= 400 ? 0 : 2;
     float16_t cellSize = grid.cellSize - (lineWidth * 2);
-    float16_t yPos = grid.marginY + lineWidth + ((grid.cellSize * grid.size) / 2);
-    float16_t xPos = grid.marginX + lineWidth;
+    SDL_Color c;
 
-    SDL_FPoint textPos = SDL_FPoint{0};
-    SDL_FPoint pTop = SDL_FPoint{xPos + cellSize / 2, yPos - (cellSize / 4)};
-    SDL_FPoint pBotton = SDL_FPoint{xPos + cellSize / 2, yPos + (cellSize / 4)};
-    SDL_FPoint pLeft = SDL_FPoint{xPos, yPos};
-    SDL_FPoint pRight = SDL_FPoint{xPos + cellSize, yPos};
-    SDL_Color colorOff = SDL_Color{222, 222, 222, SDL_ALPHA_OPAQUE};
-    SDL_Color colorOn = SDL_Color{222, 222, 222, SDL_ALPHA_OPAQUE};
-    std::vector<SDL_Vertex> vertsLeft =
-        {
-            {
-                pTop,
-                colorOff,
-                SDL_FPoint{0},
-            },
-            {
-                pBotton,
-                colorOff,
-                SDL_FPoint{0},
-            },
-            {
-                pLeft,
-                colorOff,
-                SDL_FPoint{0},
-            },
+    initSquareIsometric(grid);
 
-        };
-    std::vector<SDL_Vertex> vertsRight =
-        {
-            {
-                pTop,
-                colorOff,
-                SDL_FPoint{0},
-            },
-            {
-                pBotton,
-                colorOff,
-                SDL_FPoint{0},
-            },
-            {
-                pRight,
-                colorOff,
-                SDL_FPoint{0},
-            },
-        };
+    auto &vertsLeft = squareIsometric[0];
+    auto &vertsRight = squareIsometric[1];
+
     int shiftWidth = ((grid.cellSize * grid.size) / 2);
     int shiftHeight = shiftWidth / 2;
 
@@ -145,21 +105,22 @@ void Renderer::renderGridIsometric(Grid &grid, std::array<int, 2> cursor, int ti
         {
 
             bool showCursor = cursor[0] == n && cursor[1] == i;
-            if (showCursor)
-            {
-                renderCursor();
-            }
             auto &v = g[i];
             int value = v[n];
-            // SDL_Color c = value == 1 ? SDL_Color{0, 200, 0, SDL_ALPHA_OPAQUE} : n % 2 == z ? SDL_Color{255, 255, 255, SDL_ALPHA_OPAQUE}
-            //                                                                                : SDL_Color{222, 222, 222, SDL_ALPHA_OPAQUE};
 
-            // if (showCursor)
-            // {
-            //     c = SDL_Color{0, 100, 50, SDL_ALPHA_OPAQUE};
-            // }
-
-            auto c = getCellColor(value == 1, showCursor, z, ticks);
+            if (showCursor)
+            {
+                c = getCellColor(value == 1, z, ticks, 1);
+            }
+            else if (value == 1)
+            {
+                bool justSpawned = grid.gridArray[1 - grid.gridArrayIndex][i][n] == 0;
+                c = getCellColor(true, z, ticks, justSpawned ? 2 : 0);
+            }
+            else
+            {
+                c = getCellColor(false, z, ticks, 0);
+            }
 
             float16_t xShift = n > 0 ? ((cellSize / 2) + lineWidth) : 0;
             float16_t yShift = n > 0 ? ((cellSize / 4) + lineWidth / 2) : 0;
@@ -183,23 +144,29 @@ void Renderer::renderGridIsometric(Grid &grid, std::array<int, 2> cursor, int ti
             z++;
         }
     }
+
     return;
 }
 
-SDL_Color Renderer::getCellColor(bool isAlive, bool hasCursor, int index, int ticks)
+SDL_Color Renderer::getCellColor(bool isAlive, int index, int ticks, int effect)
 {
-    SDL_Color c = isAlive ? SDL_Color{0, 100, 50, SDL_ALPHA_OPAQUE} : index % 2 == 0 ? SDL_Color{255, 255, 255, SDL_ALPHA_OPAQUE}
-                                                                                     : SDL_Color{222, 222, 222, SDL_ALPHA_OPAQUE};
-
-    if (hasCursor)
+    SDL_Color livingCell = SDL_Color{0, 100, 50, SDL_ALPHA_OPAQUE};
+    if (effect == 1)
     {
         // breathe color effect
-
-        // todo: isolate
         auto fade = ticks > 50 ? 100 - ticks : ticks;
         Uint8 t = 200 - fade * 2;
-        c = SDL_Color{0, t, 0, SDL_ALPHA_OPAQUE};
+        return SDL_Color{0, t, 0, SDL_ALPHA_OPAQUE};
     }
+    if (effect == 2)
+    {
+        // fade in
+        Uint8 t = 255 - ((100 - ticks) * 3);
+        return ticks > 50 ? SDL_Color{t, t, t, SDL_ALPHA_OPAQUE} : livingCell;
+    }
+    SDL_Color c = isAlive ? livingCell : index % 2 == 0 ? SDL_Color{255, 255, 255, SDL_ALPHA_OPAQUE}
+                                                        : SDL_Color{222, 222, 222, SDL_ALPHA_OPAQUE};
+
     return c;
 }
 
@@ -258,4 +225,59 @@ void Renderer::initialize(SDL_Window *window)
     {
         std::cout << "renderer initialized" << std::endl;
     }
+}
+
+// create first square (0,0)
+void Renderer::initSquareIsometric(Grid &grid)
+{
+    int lineWidth = grid.size * grid.size >= 400 ? 0 : 2;
+    float16_t cellSize = grid.cellSize - (lineWidth * 2);
+    float16_t yPos = grid.marginY + lineWidth + ((grid.cellSize * grid.size) / 2);
+    float16_t xPos = grid.marginX + lineWidth;
+    SDL_FPoint textPos = SDL_FPoint{0};
+    SDL_FPoint pTop = SDL_FPoint{xPos + cellSize / 2, yPos - (cellSize / 4)};
+    SDL_FPoint pBotton = SDL_FPoint{xPos + cellSize / 2, yPos + (cellSize / 4)};
+    SDL_FPoint pLeft = SDL_FPoint{xPos, yPos};
+    SDL_FPoint pRight = SDL_FPoint{xPos + cellSize, yPos};
+    SDL_Color colorOff = SDL_Color{222, 222, 222, SDL_ALPHA_OPAQUE};
+    SDL_Color colorOn = SDL_Color{222, 222, 222, SDL_ALPHA_OPAQUE};
+    std::vector<SDL_Vertex> vertsLeft =
+        {
+            {
+                pTop,
+                colorOff,
+                SDL_FPoint{0},
+            },
+            {
+                pBotton,
+                colorOff,
+                SDL_FPoint{0},
+            },
+            {
+                pLeft,
+                colorOff,
+                SDL_FPoint{0},
+            },
+
+        };
+    std::vector<SDL_Vertex> vertsRight =
+        {
+            {
+                pTop,
+                colorOff,
+                SDL_FPoint{0},
+            },
+            {
+                pBotton,
+                colorOff,
+                SDL_FPoint{0},
+            },
+            {
+                pRight,
+                colorOff,
+                SDL_FPoint{0},
+            },
+        };
+    squareIsometric = {vertsLeft,
+                       vertsRight};
 }

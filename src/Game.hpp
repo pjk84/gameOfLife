@@ -16,6 +16,7 @@ namespace GameOfLife
 {
     typedef std::complex<double> point;
     typedef std::array<int, 2> Coords;
+
     struct Config
     {
         const char *title;
@@ -40,8 +41,8 @@ namespace GameOfLife
     {
     public:
         bool isRunning = false;
-        bool isPaused = false;
-        bool isoMetric = false;
+        bool isPaused = true;
+        bool isoMetric = true;
         TTF_Font *font;
         MouseProps mouseProps;
         Game(Config settings);
