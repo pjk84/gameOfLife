@@ -14,11 +14,11 @@
 #include <string>
 #include <complex>
 #include <tuple>
+#include <array>
 #include <filesystem>
 
 using namespace GameOfLife;
 
-typedef std::complex<double> point;
 #define xCoord x()
 #define yCoord y()
 
@@ -41,24 +41,33 @@ Game::~Game()
 
 void Game::render(int ticks)
 {
+
     _renderer.renderBackground();
 
     if (isoMetric)
     {
         // pass mouse coords
-        auto mouseCoords = getCellCoordinates(mouseX, mouseY);
+        auto mouseCoords = getCellCoordinates(mouseProps.x, mouseProps.y);
         _renderer.renderGridIsometric(_grid, mouseCoords, ticks);
-
-        // render text
-        std::string stats = "generation: " + std::to_string(_grid.generation);
-        stats += " - population: " + std::to_string(_grid.population);
-        _renderer.renderText({25, 10, stats.c_str(), {255, 255, 255}, font});
+        renderText();
     }
     else
     {
         _renderer.renderGridFlat(_grid);
     }
     _renderer.renderClear();
+}
+
+void Game::renderText()
+{
+    // render text
+    std::string stats = "generation: " + std::to_string(_grid.generation);
+    stats += " - population: " + std::to_string(_grid.population);
+    if (isPaused)
+    {
+        stats += " - paused";
+    }
+    _renderer.renderText({25, 10, stats.c_str(), {255, 255, 255}, font});
 }
 
 void Game::handleEvents()
@@ -91,6 +100,9 @@ void Game::handleEvents()
     case SDL_MOUSEBUTTONDOWN:
         handleMouseButtonDown(event.button.button);
         break;
+    case SDL_MOUSEBUTTONUP:
+        handleMouseButtonUp();
+        break;
     // case SDL_MOUSEMOTION:
     //     handleMouseMotion(event.motion.x, event.motion.y);
     default:
@@ -100,39 +112,62 @@ void Game::handleEvents()
 
 void Game::handleMouseMotionEvent(SDL_MouseMotionEvent event)
 {
-    mouseX = event.x;
-    mouseY = event.y;
+    mouseProps.x = event.x;
+    mouseProps.y = event.y;
+    if (mouseProps.isDown)
+    {
+        Coords coords = getCellCoordinates(mouseProps.x, mouseProps.y);
+        for (const auto &v : mouseProps.cellsToggled)
+        {
+            if (v[0] == coords[0] && v[1] == coords[1])
+            {
+                // cell already toggled since mousedown
+                return;
+            }
+        }
+        toggleCell();
+    }
 }
 
 void Game::handleMouseButtonDown(uint8_t buttonIndex)
 {
-    int x, y;
-    SDL_GetMouseState(&x, &y);
+    // int x, y;
+    // SDL_GetMouseState(&x, &y);
     switch (buttonIndex)
     {
     case SDL_BUTTON_LEFT:
-        toggleCell(x, y);
+        mouseProps.isDown = true;
+        toggleCell();
+        break;
     default:
         return;
     }
 }
 
-void Game::toggleCell(int x, int y)
+void Game::handleMouseButtonUp()
 {
-    std::tuple<int, int> coords = getCellCoordinates(x, y);
-    int cellX = std::get<0>(coords);
-    int cellY = std::get<1>(coords);
+
+    mouseProps.cellsToggled.clear();
+    mouseProps.isDown = false;
+}
+
+void Game::toggleCell()
+{
+    Coords coords = getCellCoordinates(mouseProps.x, mouseProps.y);
+    int cellX = coords[0];
+    int cellY = coords[1];
     if (cellX >= 0 && cellX < _grid.size)
     {
         if (cellY >= 0 && cellY < _grid.size)
         {
             // toggle cell if if window coords are within grid bounds
+            mouseProps.cellsToggled.push_back({cellX, cellY});
             return _grid.toggleCell(cellX, cellY);
         };
     };
 }
 
-std::tuple<int, int> Game::getCellCoordinates(int x, int y)
+Coords Game::getCellCoordinates(int x, int y)
 {
     int cellSize = _grid.cellSize;
     double cellY, cellX;
@@ -170,7 +205,8 @@ std::tuple<int, int> Game::getCellCoordinates(int x, int y)
         cellY = (y - _grid.marginY) / cellSize;
     }
 
-    return std::make_tuple(floor(cellX), floor(cellY));
+    Coords coords = {int(floor(cellX)), int(floor(cellY))};
+    return coords;
 }
 
 void Game::clean()
@@ -233,7 +269,7 @@ void Game::initFont()
         exit(1);
     }
 
-    auto f = TTF_OpenFont("Geneva.ttf", 24);
+    auto f = TTF_OpenFont("Geneva.ttf", _config.fontSize);
     if (!font)
     {
         printf("Couldn't initialize font: %s\n", SDL_GetError());

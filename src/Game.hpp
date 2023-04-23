@@ -7,12 +7,15 @@
 #include <list>
 #include <SDL2/SDL.h>
 // #include <SDL2_ttf/SDL_ttf.h>
+#include <complex>
 #include "Grid.hpp"
 #include "Renderer.hpp"
 #include <tuple>
 
 namespace GameOfLife
 {
+    typedef std::complex<double> point;
+    typedef std::array<int, 2> Coords;
     struct Config
     {
         const char *title;
@@ -22,6 +25,15 @@ namespace GameOfLife
         int width;
         int gridSize;
         bool fullscreen;
+        int fontSize = 24;
+    };
+
+    struct MouseProps
+    {
+        int x;
+        int y;
+        bool isDown = false;
+        std::vector<Coords> cellsToggled{};
     };
 
     class Game
@@ -31,19 +43,20 @@ namespace GameOfLife
         bool isPaused = false;
         bool isoMetric = false;
         TTF_Font *font;
-        int mouseX;
-        int mouseY;
+        MouseProps mouseProps;
         Game(Config settings);
         ~Game();
         void printGrid();
         void init(Config);
         void handleEvents();
         void render(int ticks);
+        void renderText();
         void clean();
         void handleTicks();
         int getCurrentTickAsPercentage();
-        std::tuple<int, int> getCellCoordinates(int x, int y);
+        Coords getCellCoordinates(int x, int y);
         void handleMouseButtonDown(uint8_t buttonIndex);
+        void handleMouseButtonUp();
         void handleMouseMotionEvent(SDL_MouseMotionEvent event);
         std::string concat(std::vector<std::vector<int>>);
         std::list<int> activeShapes;
@@ -60,7 +73,7 @@ namespace GameOfLife
         void renderBackground();
         void renderGrid();
         void initFont();
-        void toggleCell(int x, int y);
+        void toggleCell();
     };
 }
 

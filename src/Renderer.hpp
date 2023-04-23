@@ -4,6 +4,7 @@
 #include <SDL2/SDL.h>
 #include <SDL2_ttf/SDL_ttf.h>
 #include <tuple>
+#include <array>
 
 namespace GameOfLife
 {
@@ -24,6 +25,7 @@ namespace GameOfLife
         SDL_Renderer *_renderer;
 
     public:
+        bool animateCursor = true;
         void renderText(textProps text);
         void renderBackground();
         void renderCursor();
@@ -31,7 +33,7 @@ namespace GameOfLife
         void tearDown();
         void initialize(SDL_Window *window);
         void renderGridFlat(Grid &grid);
-        void renderGridIsometric(Grid &grid, std::tuple<int, int> cursor, int ticks);
+        void renderGridIsometric(Grid &grid, std::array<int, 2> cursor, int ticks);
         SDL_Color getCellColor(bool isAlive, bool hasCursor, int index, int ticks);
         void renderCell(int x, int y, int cellSize);
         void copyCell(int x, int y);

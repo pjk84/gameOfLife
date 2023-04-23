@@ -9,6 +9,7 @@
 #include <cstdlib>
 #include <algorithm>
 #include <tuple>
+#include <array>
 
 using namespace GameOfLife;
 
@@ -66,7 +67,7 @@ void Renderer::renderGridFlat(Grid &grid)
     return;
 }
 
-void Renderer::renderGridIsometric(Grid &grid, std::tuple<int, int> cursor, int ticks)
+void Renderer::renderGridIsometric(Grid &grid, std::array<int, 2> cursor, int ticks)
 {
     // the grid to render
     auto g = grid.gridArray[grid.gridArrayIndex];
@@ -143,7 +144,7 @@ void Renderer::renderGridIsometric(Grid &grid, std::tuple<int, int> cursor, int 
         for (int n = 0; n < grid.size; ++n)
         {
 
-            bool showCursor = std::get<0>(cursor) == n && std::get<1>(cursor) == i;
+            bool showCursor = cursor[0] == n && cursor[1] == i;
             if (showCursor)
             {
                 renderCursor();
